@@ -47,6 +47,35 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
 
   Future<void> _loadConversations() async {
     setState(() => _loadingConvs = true);
+    
+    if (const bool.fromEnvironment('INTEGRATION_TEST', defaultValue: false)) {
+      await Future.delayed(const Duration(milliseconds: 200));
+      final mockConvs = [
+        AiConversation(
+          id: 'conv_1',
+          title: 'Optimalizácia Isar databázy',
+          userId: 'test-user-uid',
+          createdAt: DateTime.now().subtract(const Duration(hours: 1)),
+          updatedAt: DateTime.now().subtract(const Duration(hours: 1)),
+        ),
+        AiConversation(
+          id: 'conv_2',
+          title: 'Google Login Issue',
+          userId: 'test-user-uid',
+          createdAt: DateTime.now().subtract(const Duration(days: 1)),
+          updatedAt: DateTime.now().subtract(const Duration(days: 1)),
+        ),
+      ];
+      setState(() {
+        _conversations = mockConvs;
+        _loadingConvs = false;
+      });
+      if (mockConvs.isNotEmpty) {
+        _selectConversation(mockConvs.first);
+      }
+      return;
+    }
+
     final auth = Provider.of<AuthProvider>(context, listen: false);
     final userId = auth.user?.uid ?? '';
     
@@ -69,6 +98,48 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
       _messages = [];
     });
 
+    if (const bool.fromEnvironment('INTEGRATION_TEST', defaultValue: false)) {
+      await Future.delayed(const Duration(milliseconds: 200));
+      final List<AiMessage> mockMsgs;
+      if (conv.id == 'conv_1') {
+        mockMsgs = [
+          AiMessage(
+            id: 'msg_1',
+            conversationId: 'conv_1',
+            content: 'Ahoj! Ako ti dnes môžem pomôcť?',
+            role: 'assistant',
+            userId: 'ai',
+            createdAt: DateTime.now().subtract(const Duration(minutes: 50)),
+          ),
+        ];
+      } else {
+        mockMsgs = [
+          AiMessage(
+            id: 'msg_4',
+            conversationId: 'conv_2',
+            content: 'Mám problém s prihlásením cez Google. V logoch vidím chybu prepojenia.',
+            role: 'user',
+            userId: 'test-user-uid',
+            createdAt: DateTime.now().subtract(const Duration(hours: 23)),
+          ),
+          AiMessage(
+            id: 'msg_5',
+            conversationId: 'conv_2',
+            content: 'Skontroluj, či máš správne nakonfigurované SHA-1 odtlačky kľúčov vo Firebase konzole pre tvoju Android/iOS aplikáciu. Bez nich Google sign-in zlyhá.',
+            role: 'assistant',
+            userId: 'ai',
+            createdAt: DateTime.now().subtract(const Duration(hours: 22)),
+          ),
+        ];
+      }
+      setState(() {
+        _messages = mockMsgs;
+        _loadingMsgs = false;
+      });
+      _scrollToBottom();
+      return;
+    }
+
     final msgs = await _supabase.getMessages(conv.id);
     setState(() {
       _messages = msgs;
@@ -80,6 +151,9 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
   }
 
   void _subscribeRealtime(String conversationId) {
+    if (const bool.fromEnvironment('INTEGRATION_TEST', defaultValue: false)) {
+      return;
+    }
     try {
       _realtimeChannel = _supabase.client
           .channel('ai-messages-realtime')
@@ -110,6 +184,9 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
   }
 
   void _unsubscribeRealtime() {
+    if (const bool.fromEnvironment('INTEGRATION_TEST', defaultValue: false)) {
+      return;
+    }
     if (_realtimeChannel != null) {
       _supabase.client.removeChannel(_realtimeChannel!);
       _realtimeChannel = null;
@@ -123,6 +200,23 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
 
     setState(() => _loadingMsgs = true);
     
+    if (const bool.fromEnvironment('INTEGRATION_TEST', defaultValue: false)) {
+      await Future.delayed(const Duration(milliseconds: 200));
+      final newConv = AiConversation(
+        id: 'conv_new_${DateTime.now().millisecondsSinceEpoch}',
+        title: 'Nová konverzácia',
+        userId: userId,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+      setState(() {
+        _conversations.insert(0, newConv);
+        _loadingMsgs = false;
+      });
+      _selectConversation(newConv);
+      return;
+    }
+
     final newConv = await _supabase.createConversation('Nová konverzácia', userId);
     if (newConv != null) {
       setState(() {
@@ -145,13 +239,36 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
     _msgController.clear();
 
     final userMsg = AiMessage(
-      id: '',
+      id: 'msg_user_${DateTime.now().millisecondsSinceEpoch}',
       conversationId: _activeConversation!.id,
       content: text,
       role: 'user',
       userId: userId,
       createdAt: DateTime.now(),
     );
+
+    setState(() {
+      _messages.add(userMsg);
+    });
+    _scrollToBottom();
+
+    if (const bool.fromEnvironment('INTEGRATION_TEST', defaultValue: false)) {
+      await Future.delayed(const Duration(milliseconds: 500));
+      final aiMsg = AiMessage(
+        id: 'msg_ai_${DateTime.now().millisecondsSinceEpoch}',
+        conversationId: _activeConversation!.id,
+        content: 'Toto je simulovaná odpoveď na: "$text". Ako expert ti odporúčam preveriť chybové hlásenia a postupovať podľa blueprintu.',
+        role: 'assistant',
+        userId: 'ai',
+        createdAt: DateTime.now(),
+      );
+      setState(() {
+        _messages.add(aiMsg);
+        _sending = false;
+      });
+      _scrollToBottom();
+      return;
+    }
 
     // Save user message to database
     final savedMsg = await _supabase.createMessage(userMsg);

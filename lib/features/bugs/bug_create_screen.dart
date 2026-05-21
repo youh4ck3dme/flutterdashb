@@ -37,8 +37,9 @@ class _BugCreateScreenState extends State<BugCreateScreen> {
   }
 
   void _submit() async {
-    if (!_formKey.currentState!.validate()) return;
-
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
     setState(() => _submitting = true);
 
     final authProvider = Provider.of<AuthProvider>(context, listen: false);

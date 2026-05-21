@@ -43,3 +43,10 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Isar database & native libraries
+*.isar
+*.isar.lock
+libisar.dylib
+libisar.so
+isar.dll

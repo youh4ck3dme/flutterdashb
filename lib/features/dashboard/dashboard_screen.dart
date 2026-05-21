@@ -240,7 +240,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             crossAxisCount: crossAxisCount,
             crossAxisSpacing: 12,
             mainAxisSpacing: 12,
-            childAspectRatio: 2.2,
+            childAspectRatio: constraints.maxWidth < 600 ? 2.5 : 1.7,
           ),
           itemCount: stats.length,
           itemBuilder: (context, i) {
@@ -357,16 +357,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          'Otvorené: ${p['open']}',
-                          style: const TextStyle(fontSize: 10, color: AppTheme.textSecondary),
+                        Expanded(
+                          child: Text(
+                            'Otvorené: ${p['open']}',
+                            style: const TextStyle(fontSize: 10, color: AppTheme.textSecondary),
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
-                        Text(
-                          'Kritické: ${p['critical']}',
-                          style: TextStyle(
-                            fontSize: 10,
-                            color: (p['critical'] as int) > 0 ? AppTheme.error : AppTheme.textSecondary,
-                            fontWeight: (p['critical'] as int) > 0 ? FontWeight.bold : FontWeight.normal,
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Kritické: ${p['critical']}',
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: (p['critical'] as int) > 0 ? AppTheme.error : AppTheme.textSecondary,
+                              fontWeight: (p['critical'] as int) > 0 ? FontWeight.bold : FontWeight.normal,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.end,
                           ),
                         ),
                       ],

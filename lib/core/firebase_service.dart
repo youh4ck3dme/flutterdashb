@@ -10,8 +10,10 @@ class FirebaseService {
   FirebaseService._internal();
 
   bool _initialized = false;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  FirebaseAuth? _authInstance;
+  FirebaseAuth get _auth => _authInstance ??= FirebaseAuth.instance;
+  GoogleSignIn? _googleSignInInstance;
+  GoogleSignIn get _googleSignIn => _googleSignInInstance ??= GoogleSignIn();
 
   Future<void> init() async {
     if (_initialized) return;

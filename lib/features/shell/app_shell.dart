@@ -135,12 +135,15 @@ class _AppShellState extends State<AppShell> {
                         children: [
                           const Icon(LucideIcons.shield, color: AppTheme.primary, size: 28),
                           const SizedBox(width: 10),
-                          Text(
-                            'Dashboard',
-                            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                  fontSize: 20,
-                                  letterSpacing: 0.5,
-                                ),
+                          Expanded(
+                            child: Text(
+                              'Dashboard',
+                              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                    fontSize: 20,
+                                    letterSpacing: 0.5,
+                                  ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                         ],
                       ),

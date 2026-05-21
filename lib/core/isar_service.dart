@@ -26,7 +26,7 @@ class IsarService {
         directory: path,
       );
     } catch (e) {
-      print('Isar initialization failed: $e');
+      print('Error initializing Isar: $e');
     }
   }
 
@@ -173,30 +173,36 @@ class IsarService {
 
   Future<void> saveLocalBug(Bug bug, {required bool synced}) async {
     await init();
-    if (_isar == null) return;
-    await isar.writeTxn(() async {
-      // Find if already exists in local DB
-      final existing = await isar.isarBugs.filter().trackingIdEqualTo(bug.trackingId).findFirst();
-      
-      final ib = existing ?? IsarBug();
-      ib.id = bug.id;
-      ib.trackingId = bug.trackingId;
-      ib.title = bug.title;
-      ib.description = bug.description;
-      ib.projectId = bug.projectId;
-      ib.assigneeId = bug.assigneeId;
-      ib.reporterId = bug.reporterId;
-      ib.severity = bug.severity;
-      ib.status = bug.status;
-      ib.stepsToReproduce = bug.stepsToReproduce;
-      ib.expectedBehavior = bug.expectedBehavior;
-      ib.actualBehavior = bug.actualBehavior;
-      ib.environment = bug.environment;
-      ib.createdAt = bug.createdAt;
-      ib.updatedAt = bug.updatedAt;
-      ib.synced = synced;
+    if (_isar == null) {
+      return;
+    }
+    try {
+      await isar.writeTxn(() async {
+        // Find if already exists in local DB
+        final existing = await isar.isarBugs.filter().trackingIdEqualTo(bug.trackingId).findFirst();
+        
+        final ib = existing ?? IsarBug();
+        ib.id = bug.id;
+        ib.trackingId = bug.trackingId;
+        ib.title = bug.title;
+        ib.description = bug.description;
+        ib.projectId = bug.projectId;
+        ib.assigneeId = bug.assigneeId;
+        ib.reporterId = bug.reporterId;
+        ib.severity = bug.severity;
+        ib.status = bug.status;
+        ib.stepsToReproduce = bug.stepsToReproduce;
+        ib.expectedBehavior = bug.expectedBehavior;
+        ib.actualBehavior = bug.actualBehavior;
+        ib.environment = bug.environment;
+        ib.createdAt = bug.createdAt;
+        ib.updatedAt = bug.updatedAt;
+        ib.synced = synced;
 
-      await isar.isarBugs.put(ib);
-    });
+        await isar.isarBugs.put(ib);
+      });
+    } catch (e) {
+      print('Error saving local bug: $e');
+    }
   }
 }

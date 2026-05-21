@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'firebase_service.dart';
 import 'supabase_service.dart';
 import 'models.dart';
@@ -8,12 +8,12 @@ class AuthProvider extends ChangeNotifier {
   final FirebaseService _firebaseService = FirebaseService();
   final SupabaseService _supabaseService = SupabaseService();
 
-  User? _user;
+  AppUser? _user;
   Profile? _profile;
   bool _loading = true;
   String? _error;
 
-  User? get user => _user;
+  AppUser? get user => _user;
   Profile? get profile => _profile;
   bool get loading => _loading;
   String? get error => _error;
@@ -27,11 +27,19 @@ class AuthProvider extends ChangeNotifier {
     _loading = true;
     notifyListeners();
 
+    if (const bool.fromEnvironment('INTEGRATION_TEST', defaultValue: false)) {
+      _user = null;
+      _profile = null;
+      _loading = false;
+      notifyListeners();
+      return;
+    }
+
     await _firebaseService.init();
     await _supabaseService.init();
 
-    _firebaseService.authStateChanges.listen((User? user) async {
-      _user = user;
+    _firebaseService.authStateChanges.listen((fb.User? user) async {
+      _user = user != null ? AppUser(uid: user.uid, email: user.email) : null;
       if (user != null) {
         _profile = await _supabaseService.getProfile(user.uid);
       } else {
@@ -47,10 +55,27 @@ class AuthProvider extends ChangeNotifier {
     _loading = true;
     _error = null;
     notifyListeners();
+
+    if (const bool.fromEnvironment('INTEGRATION_TEST', defaultValue: false)) {
+      await Future.delayed(const Duration(milliseconds: 200));
+      _user = AppUser(uid: 'test-user-uid', email: email);
+      _profile = Profile(
+        id: 'test-user-uid',
+        userId: 'test-user-uid',
+        fullName: 'Test User',
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+        jobTitle: 'Developer Ops',
+      );
+      _loading = false;
+      notifyListeners();
+      return true;
+    }
+
     try {
       await _firebaseService.signInWithEmail(email, password);
       return true;
-    } on FirebaseAuthException catch (e) {
+    } on fb.FirebaseAuthException catch (e) {
       _error = e.message ?? 'Prihlásenie zlyhalo.';
       _loading = false;
       notifyListeners();
@@ -67,6 +92,23 @@ class AuthProvider extends ChangeNotifier {
     _loading = true;
     _error = null;
     notifyListeners();
+
+    if (const bool.fromEnvironment('INTEGRATION_TEST', defaultValue: false)) {
+      await Future.delayed(const Duration(milliseconds: 200));
+      _user = AppUser(uid: 'test-user-uid', email: email);
+      _profile = Profile(
+        id: 'test-user-uid',
+        userId: 'test-user-uid',
+        fullName: fullName,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+        jobTitle: 'Developer Ops',
+      );
+      _loading = false;
+      notifyListeners();
+      return true;
+    }
+
     try {
       final credentials = await _firebaseService.signUpWithEmail(email, password);
       final uid = credentials.user?.uid;
@@ -87,7 +129,7 @@ class AuthProvider extends ChangeNotifier {
       }
       
       return true;
-    } on FirebaseAuthException catch (e) {
+    } on fb.FirebaseAuthException catch (e) {
       _error = e.message ?? 'Registrácia zlyhala.';
       _loading = false;
       notifyListeners();
@@ -104,6 +146,23 @@ class AuthProvider extends ChangeNotifier {
     _loading = true;
     _error = null;
     notifyListeners();
+
+    if (const bool.fromEnvironment('INTEGRATION_TEST', defaultValue: false)) {
+      await Future.delayed(const Duration(milliseconds: 200));
+      _user = AppUser(uid: 'test-user-uid', email: 'google-user@example.com');
+      _profile = Profile(
+        id: 'test-user-uid',
+        userId: 'test-user-uid',
+        fullName: 'Google Test User',
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+        jobTitle: 'Google Auth Tester',
+      );
+      _loading = false;
+      notifyListeners();
+      return true;
+    }
+
     try {
       final credential = await _firebaseService.signInWithGoogle();
       if (credential != null && credential.user != null) {
@@ -137,6 +196,15 @@ class AuthProvider extends ChangeNotifier {
   Future<void> signOut() async {
     _loading = true;
     notifyListeners();
+
+    if (const bool.fromEnvironment('INTEGRATION_TEST', defaultValue: false)) {
+      _user = null;
+      _profile = null;
+      _loading = false;
+      notifyListeners();
+      return;
+    }
+
     await _firebaseService.signOut();
     _user = null;
     _profile = null;
@@ -146,6 +214,21 @@ class AuthProvider extends ChangeNotifier {
 
   Future<bool> updateUserProfile(String fullName, String jobTitle) async {
     if (_user == null) return false;
+
+    if (const bool.fromEnvironment('INTEGRATION_TEST', defaultValue: false)) {
+      _profile = Profile(
+        id: _profile!.id,
+        userId: _profile!.userId,
+        fullName: fullName,
+        jobTitle: jobTitle,
+        avatarUrl: _profile!.avatarUrl,
+        createdAt: _profile!.createdAt,
+        updatedAt: DateTime.now(),
+      );
+      notifyListeners();
+      return true;
+    }
+
     try {
       final updates = {
         'full_name': fullName,

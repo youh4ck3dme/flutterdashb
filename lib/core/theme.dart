@@ -2,6 +2,31 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
+  static TextStyle _getTextStyle(
+    TextStyle Function({
+      TextStyle? textStyle,
+      Color? color,
+      double? fontSize,
+      FontWeight? fontWeight,
+      FontStyle? fontStyle,
+    }) googleFont, {
+    Color? color,
+    double? fontSize,
+    FontWeight? fontWeight,
+  }) {
+    if (const bool.fromEnvironment('INTEGRATION_TEST', defaultValue: false)) {
+      return TextStyle(
+        color: color,
+        fontSize: fontSize,
+        fontWeight: fontWeight,
+      );
+    }
+    return googleFont(
+      color: color,
+      fontSize: fontSize,
+      fontWeight: fontWeight,
+    );
+  }
   // Theme colors
   static const Color background = Color(0xFF030303);
   static const Color cardBg = Color(0x12FFFFFF); // Frosted white transparency
@@ -83,30 +108,36 @@ class AppTheme {
         error: error,
       ),
       textTheme: TextTheme(
-        headlineLarge: GoogleFonts.outfit(
+        headlineLarge: _getTextStyle(
+          GoogleFonts.outfit,
           color: textPrimary,
           fontSize: 28,
           fontWeight: FontWeight.bold,
         ),
-        headlineMedium: GoogleFonts.outfit(
+        headlineMedium: _getTextStyle(
+          GoogleFonts.outfit,
           color: textPrimary,
           fontSize: 22,
           fontWeight: FontWeight.w600,
         ),
-        titleMedium: GoogleFonts.outfit(
+        titleMedium: _getTextStyle(
+          GoogleFonts.outfit,
           color: textPrimary,
           fontSize: 16,
           fontWeight: FontWeight.w500,
         ),
-        bodyLarge: GoogleFonts.inter(
+        bodyLarge: _getTextStyle(
+          GoogleFonts.inter,
           color: textPrimary,
           fontSize: 14,
         ),
-        bodyMedium: GoogleFonts.inter(
+        bodyMedium: _getTextStyle(
+          GoogleFonts.inter,
           color: textSecondary,
           fontSize: 13,
         ),
-        labelLarge: GoogleFonts.inter(
+        labelLarge: _getTextStyle(
+          GoogleFonts.inter,
           color: textPrimary,
           fontSize: 12,
           fontWeight: FontWeight.w500,
