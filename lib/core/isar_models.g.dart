@@ -15,7 +15,7 @@ extension GetIsarProjectCollection on Isar {
 
 const IsarProjectSchema = CollectionSchema(
   name: r'IsarProject',
-  id: 8174210821231210712,
+  id: (1903206766 << 32) | 3735285976,
   properties: {
     r'createdAt': PropertySchema(
       id: 0,
@@ -55,7 +55,7 @@ const IsarProjectSchema = CollectionSchema(
   idName: r'isarId',
   indexes: {
     r'id': IndexSchema(
-      id: -3268401673993471357,
+      id: (3533983230 << 32) | 2253634179,
       name: r'id',
       unique: true,
       replace: true,
@@ -1466,7 +1466,7 @@ extension GetIsarBugCollection on Isar {
 
 const IsarBugSchema = CollectionSchema(
   name: r'IsarBug',
-  id: -5727176259899839698,
+  id: (2961505161 << 32) | 379497262,
   properties: {
     r'actualBehavior': PropertySchema(
       id: 0,
@@ -1556,7 +1556,7 @@ const IsarBugSchema = CollectionSchema(
   idName: r'isarId',
   indexes: {
     r'id': IndexSchema(
-      id: -3268401673993471357,
+      id: (3533983230 << 32) | 2253634179,
       name: r'id',
       unique: true,
       replace: true,
@@ -4738,7 +4738,7 @@ extension GetIsarOfflineQueueCollection on Isar {
 
 const IsarOfflineQueueSchema = CollectionSchema(
   name: r'IsarOfflineQueue',
-  id: -4589044699189655650,
+  id: (3226497064 << 32) | 3999877022,
   properties: {
     r'bugId': PropertySchema(
       id: 0,
