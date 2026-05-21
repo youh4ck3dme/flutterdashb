@@ -11,6 +11,7 @@ Aplikácia je uložená v adresári:
 
 Pri nasadení do produkcie sa používajú nasledujúce URL adresy a služby:
 
+*   **Vercel Production Domain:** [https://web-h4ck3d.vercel.app](https://web-h4ck3d.vercel.app)
 *   **Firebase Web App (Hosting):** [https://machinegunslots.web.app](https://machinegunslots.web.app) (alt: [https://machinegunslots.firebaseapp.com](https://machinegunslots.firebaseapp.com))
 *   **Supabase Database & Auth API:** [https://dehhwfgxocctagfvqsjr.supabase.co](https://dehhwfgxocctagfvqsjr.supabase.co)
 *   **WordPress Live Site:** [https://h4ck3d.me](https://h4ck3d.me)
