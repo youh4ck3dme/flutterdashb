@@ -50,3 +50,5 @@ app.*.map.json
 libisar.dylib
 libisar.so
 isar.dll
+secrets.json
+
