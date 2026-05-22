@@ -30,8 +30,19 @@ class SupabaseService {
     return Supabase.instance.client;
   }
 
+  bool isUuid(String value) {
+    final RegExp uuidRegExp = RegExp(
+      r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
+    );
+    return uuidRegExp.hasMatch(value);
+  }
+
   // Fetch profiles
   Future<Profile?> getProfile(String userId) async {
+    if (!isUuid(userId)) {
+      print('Firebase UID is not a UUID ($userId); skipping profile fetch.');
+      return null;
+    }
     try {
       final response = await client
           .from('profiles')
@@ -102,6 +113,10 @@ class SupabaseService {
 
   // Fetch AI conversations
   Future<List<AiConversation>> getConversations(String userId) async {
+    if (!isUuid(userId)) {
+      print('Firebase UID is not a UUID ($userId); skipping conversations fetch.');
+      return [];
+    }
     try {
       final response = await client
           .from('ai_conversations')
@@ -132,6 +147,10 @@ class SupabaseService {
 
   // Create AI conversation
   Future<AiConversation?> createConversation(String title, String userId) async {
+    if (!isUuid(userId)) {
+      print('Firebase UID is not a UUID ($userId); skipping conversation creation.');
+      return null;
+    }
     try {
       final response = await client
           .from('ai_conversations')

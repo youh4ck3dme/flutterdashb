@@ -114,18 +114,23 @@ class AuthProvider extends ChangeNotifier {
       final uid = credentials.user?.uid;
       
       if (uid != null) {
-        // Create user profile in Supabase profiles table
-        final now = DateTime.now();
-        final newProfile = Profile(
-          id: uid, // Use firebase UID
-          userId: uid,
-          fullName: fullName,
-          createdAt: now,
-          updatedAt: now,
-        );
-        
-        await _supabaseService.client.from('profiles').insert(newProfile.toMap());
-        _profile = newProfile;
+        if (_supabaseService.isUuid(uid)) {
+          // Create user profile in Supabase profiles table
+          final now = DateTime.now();
+          final newProfile = Profile(
+            id: uid, // Use firebase UID
+            userId: uid,
+            fullName: fullName,
+            createdAt: now,
+            updatedAt: now,
+          );
+          
+          await _supabaseService.client.from('profiles').insert(newProfile.toMap());
+          _profile = newProfile;
+        } else {
+          print('Firebase UID is not a UUID ($uid); skipping profiles table insert.');
+          _profile = null;
+        }
       }
       
       return true;
@@ -170,7 +175,7 @@ class AuthProvider extends ChangeNotifier {
         _profile = await _supabaseService.getProfile(uid);
         
         // If profile doesn't exist, create it
-        if (_profile == null) {
+        if (_profile == null && _supabaseService.isUuid(uid)) {
           final now = DateTime.now();
           final newProfile = Profile(
             id: uid,
@@ -227,6 +232,11 @@ class AuthProvider extends ChangeNotifier {
       );
       notifyListeners();
       return true;
+    }
+
+    if (!_supabaseService.isUuid(_user!.uid)) {
+      print('Firebase UID is not a UUID (${_user!.uid}); skipping profile update.');
+      return false;
     }
 
     try {

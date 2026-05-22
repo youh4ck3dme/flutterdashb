@@ -3,12 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import 'package:provider/provider.dart';
 import 'package:isar/isar.dart';
 import 'package:centralny_dashboard/main.dart' as app;
-import 'package:centralny_dashboard/core/auth_provider.dart';
-import 'package:centralny_dashboard/core/data_provider.dart';
-import 'package:centralny_dashboard/core/theme.dart';
 import 'package:centralny_dashboard/core/isar_service.dart';
 
 Future<void> _pumpUntilFound(

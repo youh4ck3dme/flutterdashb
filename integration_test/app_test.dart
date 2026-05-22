@@ -142,7 +142,7 @@ void main() {
       // Verify we are back to the AuthScreen
       expect(find.text('Prihlásenie'), findsOneWidget);
     });
-  Group('Navigation and Layout validation', () {
+  group('Navigation and Layout validation', () {
       testWidgets('Side menu tabs rendering', (WidgetTester tester) async {
         app.main();
         await tester.pumpAndSettle();
