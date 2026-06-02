@@ -14,6 +14,7 @@ import '../ai_assistant/ai_assistant_screen.dart';
 import '../settings/settings_screen.dart';
 import '../changelog/changelog_screen.dart';
 import '../crm/screens/crm_dashboard_screen.dart';
+import '../seo_ai/seo_ai_screen.dart';
 
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
@@ -30,6 +31,7 @@ class _AppShellState extends State<AppShell> {
     const ProjectsScreen(),
     const BugsListScreen(),
     const CrmDashboardScreen(),
+    const SeoAiScreen(),
     const AnalyticsScreen(),
     const AIAssistantScreen(),
     const SettingsScreen(),
@@ -41,6 +43,7 @@ class _AppShellState extends State<AppShell> {
     'Projekty',
     'Zoznam chýb',
     'CRM',
+    'SEO AI',
     'Analytika',
     'AI Asistent',
     'Nastavenia',
@@ -52,6 +55,7 @@ class _AppShellState extends State<AppShell> {
     LucideIcons.folderKanban,
     LucideIcons.bug,
     LucideIcons.users,
+    LucideIcons.search,
     LucideIcons.barChart2,
     LucideIcons.bot,
     LucideIcons.settings,
@@ -83,13 +87,13 @@ class _AppShellState extends State<AppShell> {
           drawer: _buildDrawer(authProvider),
           body: _screens[_selectedIndex],
           bottomNavigationBar: BottomNavigationBar(
-            currentIndex: _selectedIndex == 5
+            currentIndex: _selectedIndex == 6
                 ? 4
                 : (_selectedIndex > 3 ? 0 : _selectedIndex),
             onTap: (index) {
               setState(() {
                 if (index == 4) {
-                  _selectedIndex = 5; // AI Asistent is at index 5 of _screens
+                  _selectedIndex = 6; // AI Asistent is at index 6 of _screens
                 } else {
                   _selectedIndex = index;
                 }
