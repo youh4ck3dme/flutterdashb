@@ -8,7 +8,7 @@
 
 | Služba | URL |
 |--------|-----|
-| **Vercel (hlavná produkcia)** | [https://web-h4ck3d.vercel.app](https://web-h4ck3d.vercel.app) |
+| **Vercel (hlavná produkcia)** | [https://crm.nexify-studio.tech](https://crm.nexify-studio.tech) |
 | **Firebase Hosting (záloha)** | [https://machinegunslots.web.app](https://machinegunslots.web.app) |
 | **Firebase Hosting (alt)** | [https://machinegunslots.firebaseapp.com](https://machinegunslots.firebaseapp.com) |
 | **Vercel Inspector** | [https://vercel.com/h4ck3d/web](https://vercel.com/h4ck3d/web) |
@@ -200,7 +200,7 @@ dart run tool/patch_isar_web.dart
 npx vercel deploy build/web --scope h4ck3d --prod --yes
 ```
 
-**Produkčná URL:** [https://web-h4ck3d.vercel.app](https://web-h4ck3d.vercel.app)
+**Produkčná URL:** [https://crm.nexify-studio.tech](https://crm.nexify-studio.tech)
 
 ### Firebase Hosting (záloha)
 
