@@ -12,7 +12,7 @@ void main() async {
   String content = await file.readAsString();
   
   // Find all integer literals with 16 or more digits
-  final regExp = RegExp(r'\b-?\d{16,}\b');
+  final regExp = RegExp(r'-?\b\d{16,}\b');
   final matches = regExp.allMatches(content).map((m) => m.group(0)!).toSet();
   
   int count = 0;
@@ -25,10 +25,11 @@ void main() async {
       if (val > maxSafe || val < minSafe) {
         final high = (val >> 32).toSigned(32).toInt();
         final low = (val & BigInt.from(0xFFFFFFFF)).toSigned(32).toInt();
-        final replacement = '($high << 32) | $low';
+        final replacement = '($high << 32) | ($low & 0xFFFFFFFF)';
         
-        // Replace with word boundaries to prevent partial matches
-        content = content.replaceAll(RegExp('\\b$literal\\b'), replacement);
+        // Replace with digit lookarounds to avoid partial matches
+        final escaped = RegExp.escape(literal);
+        content = content.replaceAll(RegExp('(?<!\\d)$escaped(?!\\d)'), replacement);
         print('Patched literal: $literal -> $replacement');
         count++;
       }

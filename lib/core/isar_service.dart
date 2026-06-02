@@ -10,8 +10,10 @@ class IsarService {
   IsarService._internal();
 
   Isar? _isar;
+  static bool isMock = false;
 
   Future<void> init() async {
+    if (isMock) return;
     if (_isar != null) return;
     try {
       final String path;

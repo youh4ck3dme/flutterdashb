@@ -293,6 +293,8 @@ class CrmProvider extends ChangeNotifier {
   }
 
   // --- Client Activity logger ---
+  final List<CrmClientActivity> _mockActivities = [];
+
   Future<List<CrmClientActivity>> getActivitiesForClient(
     String clientId,
   ) async {
@@ -300,9 +302,20 @@ class CrmProvider extends ChangeNotifier {
       final isarActivities = await _isarService.getCachedActivitiesForClient(
         clientId,
       );
-      return isarActivities
+      final list = isarActivities
           .map((ia) => CrmClientActivity.fromIsar(ia))
           .toList();
+
+      // Merge with in-memory mock activities for tests
+      final mockActs = _mockActivities
+          .where((a) => a.clientId == clientId)
+          .toList();
+      for (final ma in mockActs) {
+        if (!list.any((a) => a.id == ma.id)) {
+          list.add(ma);
+        }
+      }
+      return list..sort((a, b) => b.createdAt.compareTo(a.createdAt));
     } catch (e) {
       print('Chyba načítania CRM aktivít: $e');
       return [];
@@ -325,6 +338,7 @@ class CrmProvider extends ChangeNotifier {
     );
 
     await _isarService.saveLocalActivity(newActivity.toIsar());
+    _mockActivities.add(newActivity);
 
     // TODO: Zápis do offline fronty pre budúci remote sync
     await _isarService.addToQueue(

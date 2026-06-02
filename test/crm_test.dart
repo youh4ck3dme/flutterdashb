@@ -48,7 +48,7 @@ void main() {
             done: true,
             createdAt: now,
             updatedAt: now,
-          )
+          ),
         ],
         createdAt: now,
         updatedAt: now,

@@ -15,7 +15,7 @@ extension GetIsarProjectCollection on Isar {
 
 const IsarProjectSchema = CollectionSchema(
   name: r'IsarProject',
-  id: (1903206766 << 32) | 3735285976,
+  id: (1903206766 << 32) | (-559681320 & 0xFFFFFFFF),
   properties: {
     r'createdAt': PropertySchema(
       id: 0,
@@ -47,7 +47,7 @@ const IsarProjectSchema = CollectionSchema(
   idName: r'isarId',
   indexes: {
     r'id': IndexSchema(
-      id: (3533983230 << 32) | 2253634179,
+      id: (-760984066 << 32) | (-2041333117 & 0xFFFFFFFF),
       name: r'id',
       unique: true,
       replace: true,
@@ -1523,7 +1523,7 @@ extension GetIsarBugCollection on Isar {
 
 const IsarBugSchema = CollectionSchema(
   name: r'IsarBug',
-  id: (2961505161 << 32) | 379497262,
+  id: (-1333462135 << 32) | (379497262 & 0xFFFFFFFF),
   properties: {
     r'actualBehavior': PropertySchema(
       id: 0,
@@ -1597,7 +1597,7 @@ const IsarBugSchema = CollectionSchema(
   idName: r'isarId',
   indexes: {
     r'id': IndexSchema(
-      id: (3533983230 << 32) | 2253634179,
+      id: (-760984066 << 32) | (-2041333117 & 0xFFFFFFFF),
       name: r'id',
       unique: true,
       replace: true,
@@ -5022,7 +5022,7 @@ extension GetIsarOfflineQueueCollection on Isar {
 
 const IsarOfflineQueueSchema = CollectionSchema(
   name: r'IsarOfflineQueue',
-  id: (3226497064 << 32) | 3999877022,
+  id: (-1068470232 << 32) | (-295090274 & 0xFFFFFFFF),
   properties: {
     r'bugId': PropertySchema(id: 0, name: r'bugId', type: IsarType.string),
     r'createdAt': PropertySchema(
@@ -6060,7 +6060,7 @@ extension GetIsarClientCollection on Isar {
 
 const IsarClientSchema = CollectionSchema(
   name: r'IsarClient',
-  id: -(81904176 << 32) | -1304122431,
+  id: (-81904177 << 32) | (1304122431 & 0xFFFFFFFF),
   properties: {
     r'budget': PropertySchema(id: 0, name: r'budget', type: IsarType.string),
     r'companyName': PropertySchema(
@@ -6114,7 +6114,7 @@ const IsarClientSchema = CollectionSchema(
   idName: r'isarId',
   indexes: {
     r'id': IndexSchema(
-      id: (3533983230 << 32) | 2253634179,
+      id: (-760984066 << 32) | (-2041333117 & 0xFFFFFFFF),
       name: r'id',
       unique: true,
       replace: true,
@@ -9309,7 +9309,7 @@ extension GetIsarClientActivityCollection on Isar {
 
 const IsarClientActivitySchema = CollectionSchema(
   name: r'IsarClientActivity',
-  id: (1496668869 << 32) | -2074721918,
+  id: (1496668869 << 32) | (-2074721918 & 0xFFFFFFFF),
   properties: {
     r'clientId': PropertySchema(
       id: 0,
@@ -9333,7 +9333,7 @@ const IsarClientActivitySchema = CollectionSchema(
   idName: r'isarId',
   indexes: {
     r'id': IndexSchema(
-      id: (3533983230 << 32) | 2253634179,
+      id: (-760984066 << 32) | (-2041333117 & 0xFFFFFFFF),
       name: r'id',
       unique: true,
       replace: true,
@@ -10917,7 +10917,7 @@ extension IsarClientActivityQueryProperty
 
 const IsarClientTaskSchema = Schema(
   name: r'IsarClientTask',
-  id: (71187028 << 32) | 1316470203,
+  id: (71187028 << 32) | (1316470203 & 0xFFFFFFFF),
   properties: {
     r'createdAt': PropertySchema(
       id: 0,
