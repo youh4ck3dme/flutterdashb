@@ -5,22 +5,20 @@ import 'core/data_provider.dart';
 import 'core/theme.dart';
 import 'features/auth/auth_screen.dart';
 import 'features/shell/app_shell.dart';
+import 'features/crm/providers/crm_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // We initialize services directly inside the Providers lazy loaders or constructor,
   // but to prevent race conditions on startup, we do it in the provider.
-  
+
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider<AuthProvider>(
-          create: (_) => AuthProvider(),
-        ),
-        ChangeNotifierProvider<DataProvider>(
-          create: (_) => DataProvider(),
-        ),
+        ChangeNotifierProvider<AuthProvider>(create: (_) => AuthProvider()),
+        ChangeNotifierProvider<DataProvider>(create: (_) => DataProvider()),
+        ChangeNotifierProvider<CrmProvider>(create: (_) => CrmProvider()),
       ],
       child: const MyApp(),
     ),
@@ -49,11 +47,7 @@ class AuthGate extends StatelessWidget {
     final authProvider = Provider.of<AuthProvider>(context);
 
     if (authProvider.loading) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     if (authProvider.isAuthenticated) {

@@ -13,6 +13,7 @@ import '../analytics/analytics_screen.dart';
 import '../ai_assistant/ai_assistant_screen.dart';
 import '../settings/settings_screen.dart';
 import '../changelog/changelog_screen.dart';
+import '../crm/screens/crm_dashboard_screen.dart';
 
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
@@ -28,6 +29,7 @@ class _AppShellState extends State<AppShell> {
     const DashboardScreen(),
     const ProjectsScreen(),
     const BugsListScreen(),
+    const CrmDashboardScreen(),
     const AnalyticsScreen(),
     const AIAssistantScreen(),
     const SettingsScreen(),
@@ -38,6 +40,7 @@ class _AppShellState extends State<AppShell> {
     'Prehľad',
     'Projekty',
     'Zoznam chýb',
+    'CRM',
     'Analytika',
     'AI Asistent',
     'Nastavenia',
@@ -48,6 +51,7 @@ class _AppShellState extends State<AppShell> {
     LucideIcons.layoutDashboard,
     LucideIcons.folderKanban,
     LucideIcons.bug,
+    LucideIcons.users,
     LucideIcons.barChart2,
     LucideIcons.bot,
     LucideIcons.settings,
@@ -79,10 +83,16 @@ class _AppShellState extends State<AppShell> {
           drawer: _buildDrawer(authProvider),
           body: _screens[_selectedIndex],
           bottomNavigationBar: BottomNavigationBar(
-            currentIndex: _selectedIndex > 4 ? 0 : _selectedIndex,
+            currentIndex: _selectedIndex == 5
+                ? 4
+                : (_selectedIndex > 3 ? 0 : _selectedIndex),
             onTap: (index) {
               setState(() {
-                _selectedIndex = index;
+                if (index == 4) {
+                  _selectedIndex = 5; // AI Asistent is at index 5 of _screens
+                } else {
+                  _selectedIndex = index;
+                }
               });
             },
             backgroundColor: Colors.black.withOpacity(0.5),
@@ -90,26 +100,11 @@ class _AppShellState extends State<AppShell> {
             unselectedItemColor: AppTheme.textSecondary,
             type: BottomNavigationBarType.fixed,
             items: [
-              BottomNavigationBarItem(
-                icon: Icon(_icons[0]),
-                label: 'Prehľad',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(_icons[1]),
-                label: 'Projekty',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(_icons[2]),
-                label: 'Chyby',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(_icons[3]),
-                label: 'Analytika',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(_icons[4]),
-                label: 'AI',
-              ),
+              BottomNavigationBarItem(icon: Icon(_icons[0]), label: 'Prehľad'),
+              BottomNavigationBarItem(icon: Icon(_icons[1]), label: 'Projekty'),
+              BottomNavigationBarItem(icon: Icon(_icons[2]), label: 'Chyby'),
+              BottomNavigationBarItem(icon: Icon(_icons[3]), label: 'CRM'),
+              BottomNavigationBarItem(icon: Icon(_icons[5]), label: 'AI'),
             ],
           ),
         ),
@@ -133,15 +128,17 @@ class _AppShellState extends State<AppShell> {
                       alignment: Alignment.centerLeft,
                       child: Row(
                         children: [
-                          const Icon(LucideIcons.shield, color: AppTheme.primary, size: 28),
+                          const Icon(
+                            LucideIcons.shield,
+                            color: AppTheme.primary,
+                            size: 28,
+                          ),
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(
                               'Dashboard',
-                              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                    fontSize: 20,
-                                    letterSpacing: 0.5,
-                                  ),
+                              style: Theme.of(context).textTheme.headlineMedium
+                                  ?.copyWith(fontSize: 20, letterSpacing: 0.5),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
@@ -157,7 +154,10 @@ class _AppShellState extends State<AppShell> {
                       itemBuilder: (context, index) {
                         final isSelected = _selectedIndex == index;
                         return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 4,
+                          ),
                           child: InkWell(
                             onTap: () {
                               setState(() {
@@ -166,23 +166,34 @@ class _AppShellState extends State<AppShell> {
                             },
                             borderRadius: BorderRadius.circular(8),
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
+                              ),
                               decoration: isSelected
-                                  ? AppTheme.activeGlassDecoration(borderRadius: 8)
+                                  ? AppTheme.activeGlassDecoration(
+                                      borderRadius: 8,
+                                    )
                                   : null,
                               child: Row(
                                 children: [
                                   Icon(
                                     _icons[index],
-                                    color: isSelected ? AppTheme.primary : AppTheme.textSecondary,
+                                    color: isSelected
+                                        ? AppTheme.primary
+                                        : AppTheme.textSecondary,
                                     size: 18,
                                   ),
                                   const SizedBox(width: 12),
                                   Text(
                                     _titles[index],
                                     style: TextStyle(
-                                      color: isSelected ? AppTheme.textPrimary : AppTheme.textSecondary,
-                                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                                      color: isSelected
+                                          ? AppTheme.textPrimary
+                                          : AppTheme.textSecondary,
+                                      fontWeight: isSelected
+                                          ? FontWeight.w600
+                                          : FontWeight.normal,
                                       fontSize: 13,
                                     ),
                                   ),
@@ -204,8 +215,13 @@ class _AppShellState extends State<AppShell> {
                           backgroundColor: AppTheme.primary.withOpacity(0.2),
                           radius: 18,
                           child: Text(
-                            (userProfile?.fullName ?? 'U').substring(0, 1).toUpperCase(),
-                            style: const TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold),
+                            (userProfile?.fullName ?? 'U')
+                                .substring(0, 1)
+                                .toUpperCase(),
+                            style: const TextStyle(
+                              color: AppTheme.primary,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -215,24 +231,34 @@ class _AppShellState extends State<AppShell> {
                             children: [
                               Text(
                                 userProfile?.fullName ?? 'Používateľ',
-                                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold,
+                                ),
                                 overflow: TextOverflow.ellipsis,
                               ),
                               Text(
                                 userProfile?.jobTitle ?? 'Vývojár',
-                                style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: AppTheme.textSecondary,
+                                ),
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ],
                           ),
                         ),
                         IconButton(
-                          icon: const Icon(LucideIcons.logOut, size: 16, color: AppTheme.textSecondary),
+                          icon: const Icon(
+                            LucideIcons.logOut,
+                            size: 16,
+                            color: AppTheme.textSecondary,
+                          ),
                           onPressed: () => authProvider.signOut(),
-                        )
+                        ),
                       ],
                     ),
-                  )
+                  ),
                 ],
               ),
             ),
@@ -261,7 +287,11 @@ class _AppShellState extends State<AppShell> {
               backgroundColor: AppTheme.primary,
               child: Text(
                 (userProfile?.fullName ?? 'U').substring(0, 1).toUpperCase(),
-                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 24),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 24,
+                ),
               ),
             ),
             accountName: Text(userProfile?.fullName ?? 'Používateľ'),
@@ -273,8 +303,18 @@ class _AppShellState extends State<AppShell> {
               itemBuilder: (context, index) {
                 final isSelected = _selectedIndex == index;
                 return ListTile(
-                  leading: Icon(_icons[index], color: isSelected ? AppTheme.primary : AppTheme.textSecondary),
-                  title: Text(_titles[index], style: TextStyle(color: isSelected ? Colors.white : AppTheme.textSecondary)),
+                  leading: Icon(
+                    _icons[index],
+                    color: isSelected
+                        ? AppTheme.primary
+                        : AppTheme.textSecondary,
+                  ),
+                  title: Text(
+                    _titles[index],
+                    style: TextStyle(
+                      color: isSelected ? Colors.white : AppTheme.textSecondary,
+                    ),
+                  ),
                   selected: isSelected,
                   onTap: () {
                     setState(() {
@@ -289,7 +329,10 @@ class _AppShellState extends State<AppShell> {
           const Divider(),
           ListTile(
             leading: const Icon(LucideIcons.logOut, color: Colors.redAccent),
-            title: const Text('Odhlásiť sa', style: TextStyle(color: Colors.redAccent)),
+            title: const Text(
+              'Odhlásiť sa',
+              style: TextStyle(color: Colors.redAccent),
+            ),
             onTap: () {
               Navigator.pop(context);
               auth.signOut();

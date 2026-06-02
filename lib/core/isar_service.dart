@@ -21,10 +21,13 @@ class IsarService {
         final dir = await getApplicationDocumentsDirectory();
         path = dir.path;
       }
-      _isar = await Isar.open(
-        [IsarProjectSchema, IsarBugSchema, IsarOfflineQueueSchema],
-        directory: path,
-      );
+      _isar = await Isar.open([
+        IsarProjectSchema,
+        IsarBugSchema,
+        IsarOfflineQueueSchema,
+        IsarClientSchema,
+        IsarClientActivitySchema,
+      ], directory: path);
     } catch (e) {
       print('Error initializing Isar: $e');
     }
@@ -42,14 +45,18 @@ class IsarService {
     await init();
     if (_isar == null) return [];
     final isarProjs = await isar.isarProjects.where().findAll();
-    return isarProjs.map((ip) => Project(
-      id: ip.id ?? '',
-      name: ip.name ?? '',
-      description: ip.description,
-      createdBy: ip.createdBy,
-      createdAt: ip.createdAt ?? DateTime.now(),
-      updatedAt: ip.updatedAt ?? DateTime.now(),
-    )).toList();
+    return isarProjs
+        .map(
+          (ip) => Project(
+            id: ip.id ?? '',
+            name: ip.name ?? '',
+            description: ip.description,
+            createdBy: ip.createdBy,
+            createdAt: ip.createdAt ?? DateTime.now(),
+            updatedAt: ip.updatedAt ?? DateTime.now(),
+          ),
+        )
+        .toList();
   }
 
   Future<void> cacheProjects(List<Project> projects) async {
@@ -58,16 +65,19 @@ class IsarService {
     await isar.writeTxn(() async {
       // Clear existing first
       await isar.isarProjects.clear();
-      
-      final isarProjs = projects.map((p) => IsarProject()
-        ..id = p.id
-        ..name = p.name
-        ..description = p.description
-        ..createdBy = p.createdBy
-        ..createdAt = p.createdAt
-        ..updatedAt = p.updatedAt
-      ).toList();
-      
+
+      final isarProjs = projects
+          .map(
+            (p) => IsarProject()
+              ..id = p.id
+              ..name = p.name
+              ..description = p.description
+              ..createdBy = p.createdBy
+              ..createdAt = p.createdAt
+              ..updatedAt = p.updatedAt,
+          )
+          .toList();
+
       await isar.isarProjects.putAll(isarProjs);
     });
   }
@@ -77,23 +87,27 @@ class IsarService {
     await init();
     if (_isar == null) return [];
     final isarBugs = await isar.isarBugs.where().findAll();
-    return isarBugs.map((ib) => Bug(
-      id: ib.id ?? '',
-      trackingId: ib.trackingId ?? '',
-      title: ib.title ?? '',
-      description: ib.description ?? '',
-      projectId: ib.projectId,
-      assigneeId: ib.assigneeId,
-      reporterId: ib.reporterId ?? '',
-      severity: ib.severity ?? 'low',
-      status: ib.status ?? 'new',
-      stepsToReproduce: ib.stepsToReproduce,
-      expectedBehavior: ib.expectedBehavior,
-      actualBehavior: ib.actualBehavior,
-      environment: ib.environment,
-      createdAt: ib.createdAt ?? DateTime.now(),
-      updatedAt: ib.updatedAt ?? DateTime.now(),
-    )).toList();
+    return isarBugs
+        .map(
+          (ib) => Bug(
+            id: ib.id ?? '',
+            trackingId: ib.trackingId ?? '',
+            title: ib.title ?? '',
+            description: ib.description ?? '',
+            projectId: ib.projectId,
+            assigneeId: ib.assigneeId,
+            reporterId: ib.reporterId ?? '',
+            severity: ib.severity ?? 'low',
+            status: ib.status ?? 'new',
+            stepsToReproduce: ib.stepsToReproduce,
+            expectedBehavior: ib.expectedBehavior,
+            actualBehavior: ib.actualBehavior,
+            environment: ib.environment,
+            createdAt: ib.createdAt ?? DateTime.now(),
+            updatedAt: ib.updatedAt ?? DateTime.now(),
+          ),
+        )
+        .toList();
   }
 
   Future<void> cacheBugs(List<Bug> bugs) async {
@@ -102,8 +116,11 @@ class IsarService {
     await isar.writeTxn(() async {
       // We only clear/replace bugs that are ALREADY synced.
       // Unsynced bugs should NOT be overwritten by remote, since they represent offline changes.
-      final localUnsynced = await isar.isarBugs.filter().syncedEqualTo(false).findAll();
-      final localUnsyncedMap = { for (var b in localUnsynced) b.trackingId: b };
+      final localUnsynced = await isar.isarBugs
+          .filter()
+          .syncedEqualTo(false)
+          .findAll();
+      final localUnsyncedMap = {for (var b in localUnsynced) b.trackingId: b};
 
       await isar.isarBugs.clear();
 
@@ -150,7 +167,11 @@ class IsarService {
     return await isar.isarOfflineQueues.where().sortByCreatedAt().findAll();
   }
 
-  Future<void> addToQueue(String operation, String? bugId, String jsonPayload) async {
+  Future<void> addToQueue(
+    String operation,
+    String? bugId,
+    String jsonPayload,
+  ) async {
     await init();
     if (_isar == null) return;
     await isar.writeTxn(() async {
@@ -179,8 +200,11 @@ class IsarService {
     try {
       await isar.writeTxn(() async {
         // Find if already exists in local DB
-        final existing = await isar.isarBugs.filter().trackingIdEqualTo(bug.trackingId).findFirst();
-        
+        final existing = await isar.isarBugs
+            .filter()
+            .trackingIdEqualTo(bug.trackingId)
+            .findFirst();
+
         final ib = existing ?? IsarBug();
         ib.id = bug.id;
         ib.trackingId = bug.trackingId;
@@ -204,5 +228,151 @@ class IsarService {
     } catch (e) {
       print('Error saving local bug: $e');
     }
+  }
+
+  // --- CRM Clients ---
+  Future<List<IsarClient>> getCachedClients() async {
+    await init();
+    if (_isar == null) return [];
+    return await isar.isarClients.where().findAll();
+  }
+
+  Future<void> saveLocalClient(IsarClient client) async {
+    await init();
+    if (_isar == null) return;
+    try {
+      await isar.writeTxn(() async {
+        final existing = await isar.isarClients
+            .filter()
+            .idEqualTo(client.id)
+            .findFirst();
+        if (existing != null) {
+          client.isarId = existing.isarId;
+        }
+        await isar.isarClients.put(client);
+      });
+    } catch (e) {
+      print('Error saving local client: $e');
+    }
+  }
+
+  Future<void> deleteLocalClient(String clientId) async {
+    await init();
+    if (_isar == null) return;
+    try {
+      await isar.writeTxn(() async {
+        final existing = await isar.isarClients
+            .filter()
+            .idEqualTo(clientId)
+            .findFirst();
+        if (existing != null) {
+          existing.deletedAt = DateTime.now();
+          existing.syncStatus = 'pending';
+          await isar.isarClients.put(existing);
+        }
+      });
+    } catch (e) {
+      print('Error soft deleting local client: $e');
+    }
+  }
+
+  Future<void> restoreLocalClient(String clientId) async {
+    await init();
+    if (_isar == null) return;
+    try {
+      await isar.writeTxn(() async {
+        final existing = await isar.isarClients
+            .filter()
+            .idEqualTo(clientId)
+            .findFirst();
+        if (existing != null) {
+          existing.deletedAt = null;
+          existing.syncStatus = 'pending';
+          await isar.isarClients.put(existing);
+        }
+      });
+    } catch (e) {
+      print('Error restoring local client: $e');
+    }
+  }
+
+  Future<void> permanentlyDeleteLocalClient(String clientId) async {
+    await init();
+    if (_isar == null) return;
+    try {
+      await isar.writeTxn(() async {
+        final existing = await isar.isarClients
+            .filter()
+            .idEqualTo(clientId)
+            .findFirst();
+        if (existing != null) {
+          await isar.isarClients.delete(existing.isarId!);
+        }
+      });
+    } catch (e) {
+      print('Error permanently deleting local client: $e');
+    }
+  }
+
+  // --- CRM Activities ---
+  Future<List<IsarClientActivity>> getCachedActivitiesForClient(
+    String clientId,
+  ) async {
+    await init();
+    if (_isar == null) return [];
+    return await isar.isarClientActivitys
+        .filter()
+        .clientIdEqualTo(clientId)
+        .sortByCreatedAtDesc()
+        .findAll();
+  }
+
+  Future<void> saveLocalActivity(IsarClientActivity activity) async {
+    await init();
+    if (_isar == null) return;
+    try {
+      await isar.writeTxn(() async {
+        final existing = await isar.isarClientActivitys
+            .filter()
+            .idEqualTo(activity.id)
+            .findFirst();
+        if (existing != null) {
+          activity.isarId = existing.isarId;
+        }
+        await isar.isarClientActivitys.put(activity);
+      });
+    } catch (e) {
+      print('Error saving local activity: $e');
+    }
+  }
+
+  Future<void> deleteLocalActivity(String activityId) async {
+    await init();
+    if (_isar == null) return;
+    try {
+      await isar.writeTxn(() async {
+        final existing = await isar.isarClientActivitys
+            .filter()
+            .idEqualTo(activityId)
+            .findFirst();
+        if (existing != null) {
+          await isar.isarClientActivitys.delete(existing.isarId!);
+        }
+      });
+    } catch (e) {
+      print('Error deleting local activity: $e');
+    }
+  }
+
+  // Helper na počítanie CRM pending queue položiek (TODO: synchronizácia queue s remote backendom)
+  Future<int> getCrmPendingQueueCount() async {
+    await init();
+    if (_isar == null) return 0;
+    // Počet neodoslaných zmien pre klientov v lokálnej DB
+    final pendingClients = await isar.isarClients
+        .filter()
+        .syncStatusEqualTo('pending')
+        .count();
+    return pendingClients;
   }
 }

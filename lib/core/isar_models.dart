@@ -8,7 +8,7 @@ class IsarProject {
 
   @Index(unique: true, replace: true)
   String? id;
-  
+
   String? name;
   String? description;
   String? createdBy;
@@ -22,7 +22,7 @@ class IsarBug {
 
   @Index(unique: true, replace: true)
   String? id;
-  
+
   String? trackingId;
   String? title;
   String? description;
@@ -43,9 +43,56 @@ class IsarBug {
 @collection
 class IsarOfflineQueue {
   Id? isarId;
-  
+
   String? operation; // 'create', 'update_status', 'update_severity'
-  String? bugId;     // UUID or local tracking id
-  String? payload;   // JSON data
+  String? bugId; // UUID or local tracking id
+  String? payload; // JSON data
+  DateTime? createdAt;
+}
+
+@embedded
+class IsarClientTask {
+  String? id;
+  String? text;
+  bool? done;
+  String? dueDate;
+  DateTime? createdAt;
+  DateTime? updatedAt;
+}
+
+@collection
+class IsarClient {
+  Id? isarId;
+
+  @Index(unique: true, replace: true)
+  String? id;
+
+  String? companyName;
+  String? contactName;
+  String? email;
+  String? phone;
+  String? website;
+  String? service;
+  String? status;
+  String? budget;
+  String? notes;
+  List<IsarClientTask>? tasks;
+  DateTime? createdAt;
+  DateTime? updatedAt;
+  DateTime? deletedAt;
+  String? syncStatus;
+}
+
+@collection
+class IsarClientActivity {
+  Id? isarId;
+
+  @Index(unique: true, replace: true)
+  String? id;
+
+  String? clientId;
+  String? type;
+  String? title;
+  String? content;
   DateTime? createdAt;
 }
