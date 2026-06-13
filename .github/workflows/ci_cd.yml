@@ -58,6 +58,9 @@ jobs:
         with:
           node-version: '18'
 
+      - name: Build Flutter Web
+        run: flutter build web --release
+
       - name: Install Vercel CLI
         run: npm install -g vercel
 
@@ -68,4 +71,4 @@ jobs:
             exit 0
           fi
 
-          vercel --prod --yes --token="$VERCEL_TOKEN"
+          vercel --cwd build/web --prod --yes --token="$VERCEL_TOKEN"
