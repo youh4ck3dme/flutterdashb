@@ -1,189 +1,234 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# =============================================================================
-# Vercel Secrets Setup Script for GitHub Actions
-# 
-# This script helps you set up the required Vercel secrets for automatic deploy
-# from GitHub Actions to Vercel.
-#
-# Requirements:
-#   - GitHub CLI (gh) installed and authenticated
-#   - Vercel CLI installed and authenticated
-#   - Repository: youh4ck3dme/flutterdashb
-#
-# Usage:
-#   bash setup_vercel_secrets.sh
-# =============================================================================
+# Vercel Secrets Setup Script for GitHub Actions.
+# Uses no interactive browser auth and supports non-interactive token loading
+# from env variables or a local file.
 
-set -e
+set -euo pipefail
 
-echo "╔═══════════════════════════════════════════════════════════════╗"
-echo "║  Vercel Secrets Setup for GitHub Actions                   ║"
-echo "║  Repository: youh4ck3dme/flutterdashb                     ║"
-echo "╚═══════════════════════════════════════════════════════════════╝"
-echo ""
-
-# Check if gh CLI is installed
-if ! command -v gh &> /dev/null; then
-    echo "❌ ERROR: GitHub CLI (gh) is not installed!"
-    echo "   Install it from: https://cli.github.com/"
-    exit 1
-fi
-
-# Check if user is authenticated with GitHub
-if ! gh auth status &> /dev/null; then
-    echo "❌ ERROR: Not authenticated with GitHub CLI!"
-    echo "   Run: gh auth login"
-    exit 1
-fi
-
-echo "✅ GitHub CLI is installed and authenticated"
-echo ""
-
-# Get repo info
 REPO_OWNER="youh4ck3dme"
 REPO_NAME="flutterdashb"
+VERCEL_TOKEN_FILE="${VERCEL_TOKEN_FILE:-$HOME/Documents/secrets/rh4ck3d-vercel-ecovery-codes.txt}"
+VERCEL_SCOPE="${VERCEL_SCOPE:-h4ck3d}"
+NON_INTERACTIVE=false
+CREATE_PROJECT=false
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --repo=*)
+      IFS='/' read -r REPO_OWNER REPO_NAME <<<"${1#*=}"
+      shift
+      ;;
+    --repo)
+      IFS='/' read -r REPO_OWNER REPO_NAME <<<"$2"
+      shift 2
+      ;;
+    --token-file=*)
+      VERCEL_TOKEN_FILE="${1#*=}"
+      shift
+      ;;
+    --no-interactive)
+      NON_INTERACTIVE=true
+      shift
+      ;;
+    --create-project)
+      CREATE_PROJECT=true
+      shift
+      ;;
+    --scope=*)
+      VERCEL_SCOPE="${1#*=}"
+      shift
+      ;;
+    --scope)
+      VERCEL_SCOPE="$2"
+      shift 2
+      ;;
+    -h|--help)
+      echo "Usage: $0 [--no-interactive] [--create-project] [--repo=<owner/name>] [--scope=<team>] [--token-file=<path>]"
+      exit 0
+      ;;
+    *)
+      echo "Unknown arg: $1"
+      echo "Usage: $0 [--no-interactive] [--create-project] [--repo=<owner/name>] [--scope=<team>] [--token-file=<path>]"
+      exit 1
+      ;;
+  esac
+done
+
 REPO_FULL="$REPO_OWNER/$REPO_NAME"
 
-echo "📦 Repository: $REPO_FULL"
-echo ""
+if [[ "$REPO_FULL" != */* ]]; then
+  echo "Invalid repo format. Use owner/name."
+  exit 1
+fi
 
-# Function to get Vercel info
-get_vercel_info() {
-    echo "🔍 Getting Vercel information..."
-    
-    # Try to get token
-    if command -v vercel &> /dev/null; then
-        if vercel whoami &> /dev/null; then
-            VERCEL_ORG_ID=$(vercel whoami 2>&1 | grep -oP '"id":\s*"\K[^"]+' | head -1)
-            VERCEL_PROJECTS=$(vercel projects 2>&1)
-            
-            if echo "$VERCEL_PROJECTS" | grep -q "flutterdashb"; then
-                VERCEL_PROJECT_ID=$(echo "$VERCEL_PROJECTS" | grep "flutterdashb" | grep -oP '"id":\s*"\K[^"]+' | head -1)
-                echo "   ✅ Found Vercel project: flutterdashb"
-                echo "   📝 ORG_ID: $VERCEL_ORG_ID"
-                echo "   📝 PROJECT_ID: $VERCEL_PROJECT_ID"
-            else
-                echo "   ⚠️  Vercel project 'flutterdashb' not found. You'll need to create it."
-                VERCEL_ORG_ID=""
-                VERCEL_PROJECT_ID=""
-            fi
-        else
-            echo "   ⚠️  Not logged in to Vercel. You'll need to provide values manually."
-            VERCEL_ORG_ID=""
-            VERCEL_PROJECT_ID=""
-        fi
-    else
-        echo "   ⚠️  Vercel CLI not installed. You'll need to provide values manually."
-        VERCEL_ORG_ID=""
-        VERCEL_PROJECT_ID=""
-    fi
+require_cmd() {
+  command -v "$1" >/dev/null 2>&1 || { echo "❌ ERROR: '$1' is required."; exit 1; }
 }
 
-# Try to auto-detect Vercel info
-get_vercel_info
-echo ""
+normalize() {
+  printf '%s' "$1" | tr -d '\r\n' | tr -d '"'
+}
 
-# Ask for VERCEL_TOKEN
-echo "🔑 Enter your Vercel Token"
-echo "   Get it from: https://vercel.com/account/tokens"
-echo "   (Must have Full Access permissions)"
-read -p "   VERCEL_TOKEN: " VERCEL_TOKEN
+is_valid_token() {
+  [[ "$1" =~ ^(vcp_|vc_|vercel_|gho_)[A-Za-z0-9_-]+$ ]]
+}
 
-# Validate token format
-if [[ ! "$VERCEL_TOKEN" =~ ^gho_ ]]; then
-    echo "   ⚠️  Token should start with 'gho_'. Did you copy it correctly?"
-    read -p "   VERCEL_TOKEN: " VERCEL_TOKEN
-fi
+read_secret_line() {
+  local prompt="$1"
+  local var_name="$2"
+  if [ "$NON_INTERACTIVE" = true ]; then
+    return 1
+  fi
+  local value
+  read -r -p "$prompt: " value
+  printf -v "$var_name" '%s' "$(normalize "$value")"
+}
 
-# Ask for ORG_ID if not auto-detected
-if [ -z "$VERCEL_ORG_ID" ]; then
-    echo ""
-    echo "🏢 Enter your Vercel Organization ID"
-    echo "   Get it from: vercel whoami"
-    read -p "   VERCEL_ORG_ID: " VERCEL_ORG_ID
-else
-    echo ""
-    echo "🏢 Using detected ORG_ID: $VERCEL_ORG_ID"
-    read -p "   Press Enter to confirm or type new value: " ORG_INPUT
-    if [ -n "$ORG_INPUT" ]; then
-        VERCEL_ORG_ID="$ORG_INPUT"
+extract_token_from_file() {
+  local file="$1"
+  [ -f "$file" ] || return 1
+  local line
+  while IFS= read -r line || [ -n "$line" ]; do
+    line="$(normalize "$line")"
+    if [[ "$line" =~ ^(vcp_|vc_|vercel_|gho_)[A-Za-z0-9_-]+$ ]]; then
+      printf '%s' "$line"
+      return 0
     fi
-fi
+  done < "$file"
+  return 1
+}
 
-# Ask for PROJECT_ID if not auto-detected
-if [ -z "$VERCEL_PROJECT_ID" ]; then
-    echo ""
-    echo "📁 Enter your Vercel Project ID"
-    echo "   Get it from: vercel projects"
-    read -p "   VERCEL_PROJECT_ID: " VERCEL_PROJECT_ID
-else
-    echo ""
-    echo "📁 Using detected PROJECT_ID: $VERCEL_PROJECT_ID"
-    read -p "   Press Enter to confirm or type new value: " PROJECT_INPUT
-    if [ -n "$PROJECT_INPUT" ]; then
-        VERCEL_PROJECT_ID="$PROJECT_INPUT"
+resolve_org_id() {
+  local token="$1"
+  local response
+  response="$(curl -sS -H "Authorization: Bearer $token" https://api.vercel.com/v2/user || true)"
+  printf '%s' "$response" | jq -r '.user.defaultTeamId // .user.id // empty'
+}
+
+resolve_project_id() {
+  local token="$1"
+  local org_id="$2"
+  local name="$3"
+  local next_cursor=""
+  local response
+  local endpoint
+  local project_id
+
+  while :; do
+    endpoint="https://api.vercel.com/v10/projects?limit=100"
+    [ -n "$org_id" ] && endpoint+="&teamId=$org_id"
+    [ -n "$next_cursor" ] && endpoint+="&until=$next_cursor"
+
+    response="$(curl -sS -H "Authorization: Bearer $token" "$endpoint" || true)"
+    project_id="$(printf '%s' "$response" | jq -r --arg name "$name" '.projects[] | select(.name == $name) | .id' | head -n 1)"
+    if [ -n "$project_id" ]; then
+      printf '%s' "$project_id"
+      return 0
     fi
-fi
 
-echo ""
-echo "═══════════════════════════════════════════════════════════════"
-echo "  Setting up GitHub Secrets for: $REPO_FULL"
-echo "═══════════════════════════════════════════════════════════════"
-echo ""
+    next_cursor="$(printf '%s' "$response" | jq -r '.pagination.next // empty')"
+    if [ -z "$next_cursor" ]; then
+      break
+    fi
+  done
+  printf ''
+  return 0
+}
 
-# Set secrets using GitHub API
+print_header() {
+  echo "╔═══════════════════════════════════════════════════════════════╗"
+  echo "║  Vercel Secrets Setup for GitHub Actions                   ║"
+  echo "║  Repository: $REPO_FULL                                    ║"
+  echo "╚═══════════════════════════════════════════════════════════════╝"
+  echo ""
+}
+
 set_secret() {
-    local secret_name="$1"
-    local secret_value="$2"
-    
-    echo "   Setting secret: $secret_name"
-    
-    # Use GitHub API to create/update secret
-    # The API uses a special endpoint for repository secrets
-    GH_RESPONSE=$(gh api \
-        --method PUT \
-        --header "Accept: application/vnd.github.v3+json" \
-        "repos/$REPO_OWNER/$REPO_NAME/actions/secrets/$secret_name" \
-        --field encrypted_value="$(echo -n "$secret_value" | base64)" \
-        --field key_id="$(gh api repos/$REPO_OWNER/$REPO_NAME/actions/secrets/public-key | jq -r '.key_id')" \
-        2>&1)
-    
-    # Alternative approach using gh secret command
-    echo "$secret_value" | gh secret set "$secret_name" --repo "$REPO_FULL" 2>&1
-    
-    if [ $? -eq 0 ]; then
-        echo "   ✅ Successfully set $secret_name"
-    else
-        echo "   ❌ Failed to set $secret_name"
-        return 1
-    fi
+  local name="$1"
+  local value="$2"
+  printf '%s' "$value" | gh secret set "$name" --repo "$REPO_FULL"
+  echo "   ✅ Set $name"
 }
 
-echo "🔧 Setting GitHub Secrets..."
-echo ""
+require_cmd gh
+require_cmd jq
+require_cmd curl
 
-# Set each secret
-set_secret "VERCEL_TOKEN" "$VERCEL_TOKEN" && \
-set_secret "VERCEL_ORG_ID" "$VERCEL_ORG_ID" && \
+if ! gh auth status >/dev/null 2>&1; then
+  echo "❌ ERROR: Not authenticated with GitHub CLI. Run: gh auth login"
+  exit 1
+fi
+
+if [ -z "${VERCEL_TOKEN:-}" ] && [ -f "$VERCEL_TOKEN_FILE" ]; then
+  VERCEL_TOKEN="$(extract_token_from_file "$VERCEL_TOKEN_FILE" || true)"
+fi
+if [ -z "${VERCEL_TOKEN:-}" ]; then
+  read_secret_line "   VERCEL_TOKEN (from https://vercel.com/account/tokens)" VERCEL_TOKEN || true
+fi
+VERCEL_TOKEN="${VERCEL_TOKEN:-}"
+
+if [ -z "$VERCEL_TOKEN" ]; then
+  echo "❌ ERROR: VERCEL_TOKEN not provided."
+  exit 1
+fi
+
+if ! is_valid_token "$VERCEL_TOKEN"; then
+  echo "⚠️  Token has non-standard format. Continuing anyway."
+fi
+VERCEL_TOKEN="$(normalize "$VERCEL_TOKEN")"
+
+if [ -z "${VERCEL_ORG_ID:-}" ]; then
+  VERCEL_ORG_ID="$(resolve_org_id "$VERCEL_TOKEN")"
+fi
+if [ -z "${VERCEL_ORG_ID:-}" ]; then
+  read_secret_line "   VERCEL_ORG_ID (from vercel whoami / token scope)" VERCEL_ORG_ID || true
+fi
+VERCEL_ORG_ID="${VERCEL_ORG_ID:-}"
+
+if [ -z "${VERCEL_PROJECT_ID:-}" ] && [ -n "$VERCEL_ORG_ID" ]; then
+  VERCEL_PROJECT_ID="$(resolve_project_id "$VERCEL_TOKEN" "$VERCEL_ORG_ID" "$REPO_NAME")"
+fi
+if [ -z "${VERCEL_PROJECT_ID:-}" ] && [ "$CREATE_PROJECT" = true ]; then
+  require_cmd vercel
+  echo "ℹ️  Creating Vercel project '$REPO_NAME' in scope '$VERCEL_SCOPE'..."
+  vercel project add "$REPO_NAME" --scope "$VERCEL_SCOPE" --token "$VERCEL_TOKEN" --non-interactive >/dev/null
+  VERCEL_PROJECT_ID="$(resolve_project_id "$VERCEL_TOKEN" "$VERCEL_ORG_ID" "$REPO_NAME")"
+fi
+if [ -z "${VERCEL_PROJECT_ID:-}" ]; then
+  read_secret_line "   VERCEL_PROJECT_ID (from vercel projects)" VERCEL_PROJECT_ID || true
+fi
+VERCEL_PROJECT_ID="${VERCEL_PROJECT_ID:-}"
+
+if [ -z "$VERCEL_ORG_ID" ] || [ -z "$VERCEL_PROJECT_ID" ]; then
+  echo "❌ ERROR: Missing VERCEL_ORG_ID or VERCEL_PROJECT_ID."
+  echo "   Current token may not have access to project '$REPO_NAME'."
+  exit 1
+fi
+
+if [ -z "$(resolve_project_id "$VERCEL_TOKEN" "$VERCEL_ORG_ID" "$REPO_NAME")" ]; then
+  echo "⚠️  INFO: project '$REPO_NAME' was not found in scope '$VERCEL_ORG_ID' via API."
+fi
+
+mkdir -p .vercel
+cat > .vercel/project.json <<EOF
+{
+  "projectId": "$VERCEL_PROJECT_ID",
+  "orgId": "$VERCEL_ORG_ID",
+  "projectName": "$REPO_NAME"
+}
+EOF
+
+print_header
+echo "🔧 Setting GitHub Secrets..."
+set_secret "VERCEL_TOKEN" "$VERCEL_TOKEN"
+set_secret "VERCEL_ORG_ID" "$VERCEL_ORG_ID"
 set_secret "VERCEL_PROJECT_ID" "$VERCEL_PROJECT_ID"
 
 echo ""
-echo "═══════════════════════════════════════════════════════════════"
-echo "✅ All Vercel secrets have been set up!"
-echo "═══════════════════════════════════════════════════════════════"
-echo ""
-echo "📋 Summary:"
-echo "   Repository: $REPO_FULL"
-echo "   VERCEL_TOKEN: $(echo $VERCEL_TOKEN | cut -c1-10)..."
-echo "   VERCEL_ORG_ID: $VERCEL_ORG_ID"
-echo "   VERCEL_PROJECT_ID: $VERCEL_PROJECT_ID"
-echo ""
-echo "🚀 Next Steps:"
-echo "   1. GitHub Actions will automatically run within 5 minutes"
-echo "   2. Or manually trigger: https://github.com/$REPO_FULL/actions"
-echo "   3. Your dashboard will be deployed to: https://flutterdashb.vercel.app"
-echo ""
-echo "💡 Verify secrets:"
-echo "   gh secret list --repo $REPO_FULL"
-echo ""
+echo "✅ Done."
+echo "Repo: $REPO_FULL"
+echo "Resolved project: $REPO_NAME ($VERCEL_PROJECT_ID)"
+echo "Scope: $VERCEL_ORG_ID"
+echo "Next: gh workflow run 'Flutter CI/CD + Vercel Deploy' -R $REPO_FULL"
+echo "Verify: gh secret list --repo $REPO_FULL"

@@ -17,37 +17,29 @@ def verify_vercel():
     if config.get('version') != 2:
         errors.append(f"Expected vercel.json version to be 2, found {config.get('version')}")
         
-    # Check builds
-    builds = config.get('builds', [])
-    if not builds:
-        errors.append("Missing 'builds' configuration in vercel.json")
-    else:
-        for b in builds:
-            if b.get('src') == 'web/**' and b.get('use') != '@vercel/static-build':
-                errors.append(f"Incorrect builder for web/**. Expected @vercel/static-build, found {b.get('use')}")
-                
-    # Check routes order
+    # Check static Flutter SPA routes.
     routes = config.get('routes', [])
     if not routes:
         errors.append("Missing 'routes' configuration in vercel.json")
     else:
-        api_index = -1
+        filesystem_index = -1
         fallback_index = -1
         for i, r in enumerate(routes):
             src = r.get('src', '')
-            if '/api/' in src:
-                api_index = i
-            elif '/(.*)' in src:
+            if r.get('handle') == 'filesystem':
+                filesystem_index = i
+            elif src == '/(.*)' and r.get('dest') == '/index.html':
                 fallback_index = i
-                
-        if api_index != -1 and fallback_index != -1:
-            if fallback_index < api_index:
-                errors.append(f"SPA fallback route (index {fallback_index}) is placed before API proxy route (index {api_index}). API requests will be swallowed!")
-        else:
-            if api_index == -1:
-                errors.append("Could not find API proxy route (/api/...) in vercel.json")
-            if fallback_index == -1:
-                errors.append("Could not find SPA fallback route (/(.*)) in vercel.json")
+
+        if filesystem_index == -1:
+            errors.append("Could not find filesystem route before SPA fallback.")
+        if fallback_index == -1:
+            errors.append("Could not find SPA fallback route to /index.html.")
+        if filesystem_index != -1 and fallback_index != -1 and filesystem_index > fallback_index:
+            errors.append(
+                f"Filesystem route (index {filesystem_index}) must be before SPA fallback "
+                f"(index {fallback_index}) so JS/JSON assets are not served as HTML."
+            )
                 
     if errors:
         print("VERIFICATION FAILED:")
@@ -55,7 +47,7 @@ def verify_vercel():
             print(f"  - {err}")
         sys.exit(1)
     else:
-        print("VERIFICATION SUCCESSFUL: vercel.json is 100% correct and API routing is secure!")
+        print("VERIFICATION SUCCESSFUL: vercel.json serves Flutter static assets before SPA fallback.")
 
 if __name__ == '__main__':
     verify_vercel()
