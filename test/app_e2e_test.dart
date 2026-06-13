@@ -59,7 +59,7 @@ Future<void> _tapSidebarItem(WidgetTester tester, String label) async {
 void main() {
   group('Centralny Dashboard E2E Headless Tests', () {
     setUpAll(() async {
-      GoogleFonts.config.allowRuntimeFetching = false;
+      GoogleFonts.config.allowRuntimeFetching = true;
       const MethodChannel channel = MethodChannel(
         'plugins.flutter.io/path_provider',
       );
