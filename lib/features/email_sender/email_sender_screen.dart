@@ -89,6 +89,44 @@ class _Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isCompact = MediaQuery.of(context).size.width < 460;
+    final identity = Row(
+      children: [
+        Container(
+          width: 40,
+          height: 40,
+          decoration: AppTheme.activeGlassDecoration(borderRadius: 8),
+          child: const Icon(
+            LucideIcons.mail,
+            color: AppTheme.primary,
+            size: 20,
+          ),
+        ),
+        const SizedBox(width: 14),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Email Sender',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                hasAccess
+                    ? 'Google Cloud / Firebase platený profil je aktívny'
+                    : 'Platené funkcie sú dostupné iba pre $googleCloudOwnerEmail',
+                maxLines: 1,
+                style: TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -96,74 +134,35 @@ class _Header extends StatelessWidget {
         color: Color(0x0AFFFFFF),
         border: Border(bottom: BorderSide(color: Color(0x15FFFFFF))),
       ),
-      child: Flex(
-        direction: isCompact ? Axis.vertical : Axis.horizontal,
-        crossAxisAlignment: isCompact
-            ? CrossAxisAlignment.start
-            : CrossAxisAlignment.center,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: AppTheme.activeGlassDecoration(borderRadius: 8),
-                child: const Icon(
-                  LucideIcons.mail,
-                  color: AppTheme.primary,
-                  size: 20,
+      child: isCompact
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                identity,
+                const SizedBox(height: 12),
+                _StatusPill(
+                  label: hasAccess ? 'ACCESS OK' : 'LOCKED',
+                  color: hasAccess ? AppTheme.success : AppTheme.warning,
+                  icon: hasAccess
+                      ? Icons.verified_user_outlined
+                      : Icons.lock_outline,
                 ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Email Sender',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      hasAccess
-                          ? 'Google Cloud / Firebase platený profil je aktívny'
-                          : 'Platené funkcie sú dostupné iba pre $googleCloudOwnerEmail',
-                      maxLines: 1,
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: AppTheme.textSecondary,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
+              ],
+            )
+          : Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(child: identity),
+                const SizedBox(width: 16),
+                _StatusPill(
+                  label: hasAccess ? 'ACCESS OK' : 'LOCKED',
+                  color: hasAccess ? AppTheme.success : AppTheme.warning,
+                  icon: hasAccess
+                      ? Icons.verified_user_outlined
+                      : Icons.lock_outline,
                 ),
-              ),
-            ],
-          ),
-          if (isCompact) ...[
-            const SizedBox(height: 12),
-            _StatusPill(
-              label: hasAccess ? 'ACCESS OK' : 'LOCKED',
-              color: hasAccess ? AppTheme.success : AppTheme.warning,
-              icon: hasAccess
-                  ? Icons.verified_user_outlined
-                  : Icons.lock_outline,
+              ],
             ),
-          ] else ...[
-            const Spacer(),
-            _StatusPill(
-              label: hasAccess ? 'ACCESS OK' : 'LOCKED',
-              color: hasAccess ? AppTheme.success : AppTheme.warning,
-              icon: hasAccess
-                  ? Icons.verified_user_outlined
-                  : Icons.lock_outline,
-            ),
-          ],
-        ],
-      ),
     );
   }
 }
@@ -229,7 +228,7 @@ class _MetricGrid extends StatelessWidget {
             crossAxisCount: crossAxisCount,
             crossAxisSpacing: 12,
             mainAxisSpacing: 12,
-            childAspectRatio: constraints.maxWidth < 520 ? 1.28 : 1.35,
+            childAspectRatio: constraints.maxWidth < 520 ? 1.16 : 1.22,
           ),
           itemCount: metrics.length,
           itemBuilder: (context, index) {
@@ -360,10 +359,7 @@ class _SecurityPanel extends StatelessWidget {
                 Expanded(
                   child: Text(
                     control,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: AppTheme.textPrimary,
-                    ),
+                    style: TextStyle(fontSize: 12, color: AppTheme.textPrimary),
                   ),
                 ),
               ],
@@ -494,10 +490,7 @@ class _PanelTitle extends StatelessWidget {
               const SizedBox(height: 2),
               Text(
                 subtitle,
-                style: TextStyle(
-                  fontSize: 11,
-                  color: AppTheme.textSecondary,
-                ),
+                style: TextStyle(fontSize: 11, color: AppTheme.textSecondary),
               ),
             ],
           ),
@@ -590,10 +583,7 @@ class _TimelineStep extends StatelessWidget {
               const SizedBox(height: 2),
               Text(
                 subtitle,
-                style: TextStyle(
-                  fontSize: 11,
-                  color: AppTheme.textSecondary,
-                ),
+                style: TextStyle(fontSize: 11, color: AppTheme.textSecondary),
               ),
             ],
           ),
