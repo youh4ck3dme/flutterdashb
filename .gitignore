@@ -53,3 +53,10 @@ isar.dll
 secrets.json
 
 .firebase/
+
+# Platform-specific build directories
+macos/
+windows/
+android/
+ios/
+
