@@ -6,14 +6,14 @@ import '../video_dashboard/video_frame_stub.dart'
     if (dart.library.html) '../video_dashboard/video_frame_web.dart';
 
 class H4ckArsenalScreen extends StatelessWidget {
-  static const String localUrl = 'http://127.0.0.1:5173';
+  static const String url = 'https://arsenal.h4ck3d.me/';
 
   const H4ckArsenalScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return FrameScreen(
-      url: localUrl,
+      url: url,
       title: 'H4CK Arsenal',
       icon: LucideIcons.terminal,
       frameBuilder: (url) => createVideoFrame(url),

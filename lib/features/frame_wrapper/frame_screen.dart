@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../core/theme.dart';
 import '../bugs/bug_create_screen.dart';
 import 'frame_error_handler.dart';
@@ -41,7 +42,8 @@ class _FrameScreenState extends State<FrameScreen> {
         builder: (context) => BugCreateScreen(
           prefilledData: {
             'title': 'Chyba v ${widget.title}',
-            'description': 'Frame ${widget.url} zlyhal: ${_errorMessage ?? "Neznáma chyba"}',
+            'description':
+                'Frame ${widget.url} zlyhal: ${_errorMessage ?? "Neznáma chyba"}',
             'environment': 'Frame: ${widget.title} | URL: ${widget.url}',
           },
         ),
@@ -54,6 +56,11 @@ class _FrameScreenState extends State<FrameScreen> {
       _hasError = false;
       _errorMessage = null;
     });
+  }
+
+  Future<void> _openExternal() async {
+    final uri = Uri.parse(widget.url);
+    await launchUrl(uri, webOnlyWindowName: '_blank');
   }
 
   @override
@@ -99,9 +106,9 @@ class _FrameScreenState extends State<FrameScreen> {
                 Text(
                   'Frame sa nepodarilo načítať',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.textPrimary,
-                      ),
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.textPrimary,
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
@@ -146,9 +153,27 @@ class _FrameScreenState extends State<FrameScreen> {
                     ),
                   ),
                 const SizedBox(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                Wrap(
+                  spacing: 16,
+                  runSpacing: 12,
+                  alignment: WrapAlignment.center,
                   children: [
+                    ElevatedButton.icon(
+                      icon: const Icon(LucideIcons.externalLink, size: 18),
+                      label: const Text('Otvoriť appku'),
+                      onPressed: _openExternal,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.primary,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 12,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
                     ElevatedButton.icon(
                       icon: const Icon(LucideIcons.bug, size: 18),
                       label: const Text('Nahlásiť chybu'),
@@ -165,7 +190,6 @@ class _FrameScreenState extends State<FrameScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 16),
                     OutlinedButton.icon(
                       icon: const Icon(LucideIcons.refreshCw, size: 18),
                       label: const Text('Skúsiť znova'),
@@ -206,8 +230,20 @@ class _FrameScreenState extends State<FrameScreen> {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
       ),
-      child: widget.frameBuilder(widget.url),
+      child: Stack(
+        children: [
+          Positioned.fill(child: widget.frameBuilder(widget.url)),
+          Positioned(
+            top: 12,
+            right: 12,
+            child: IconButton.filledTonal(
+              tooltip: 'Otvoriť appku v novej karte',
+              icon: const Icon(LucideIcons.externalLink, size: 18),
+              onPressed: _openExternal,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
-
