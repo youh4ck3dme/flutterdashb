@@ -1,6 +1,9 @@
+// ignore_for_file: avoid_print
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
+import 'config.dart';
 import 'firebase_service.dart';
+import 'google_cloud_access.dart';
 import 'supabase_service.dart';
 import 'models.dart';
 
@@ -18,6 +21,27 @@ class AuthProvider extends ChangeNotifier {
   bool get loading => _loading;
   String? get error => _error;
   bool get isAuthenticated => _user != null;
+  bool get hasPaidGoogleCloudAccess => hasGoogleCloudAccess(_user?.email);
+
+  /// Get user role from profile
+  UserRole get userRole => _profile?.role ?? UserRole.guest;
+
+  /// Check if user has admin role
+  bool get isAdmin => _user?.isAdmin ?? false;
+
+  /// Check if user has manager role or higher
+  bool get isManager => _user?.isManager ?? false;
+
+  /// Check if user has developer role or higher
+  bool get isDeveloper => _user?.isDeveloper ?? false;
+
+  /// Check if user has specific role
+  bool hasRole(UserRole requiredRole) {
+    return _user?.hasRole(requiredRole) ?? false;
+  }
+
+  /// Get role display name
+  String get roleDisplayName => userRole.displayName;
 
   AuthProvider() {
     _init();
@@ -37,6 +61,15 @@ class AuthProvider extends ChangeNotifier {
 
     await _firebaseService.init();
     await _supabaseService.init();
+
+    if (AppConfig.firebaseApiKey.isEmpty) {
+      _user = null;
+      _profile = null;
+      _loading = false;
+      _error = null;
+      notifyListeners();
+      return;
+    }
 
     _firebaseService.authStateChanges.listen((fb.User? user) async {
       _user = user != null ? AppUser(uid: user.uid, email: user.email) : null;
@@ -110,9 +143,12 @@ class AuthProvider extends ChangeNotifier {
     }
 
     try {
-      final credentials = await _firebaseService.signUpWithEmail(email, password);
+      final credentials = await _firebaseService.signUpWithEmail(
+        email,
+        password,
+      );
       final uid = credentials.user?.uid;
-      
+
       if (uid != null) {
         if (_supabaseService.isUuid(uid)) {
           // Create user profile in Supabase profiles table
@@ -124,15 +160,19 @@ class AuthProvider extends ChangeNotifier {
             createdAt: now,
             updatedAt: now,
           );
-          
-          await _supabaseService.client.from('profiles').insert(newProfile.toMap());
+
+          await _supabaseService.client
+              .from('profiles')
+              .insert(newProfile.toMap());
           _profile = newProfile;
         } else {
-          print('Firebase UID is not a UUID ($uid); skipping profiles table insert.');
+          print(
+            'Firebase UID is not a UUID ($uid); skipping profiles table insert.',
+          );
           _profile = null;
         }
       }
-      
+
       return true;
     } on fb.FirebaseAuthException catch (e) {
       _error = e.message ?? 'Registrácia zlyhala.';
@@ -154,7 +194,7 @@ class AuthProvider extends ChangeNotifier {
 
     if (const bool.fromEnvironment('INTEGRATION_TEST', defaultValue: false)) {
       await Future.delayed(const Duration(milliseconds: 200));
-      _user = AppUser(uid: 'test-user-uid', email: 'google-user@example.com');
+      _user = AppUser(uid: 'test-user-uid', email: googleCloudOwnerEmail);
       _profile = Profile(
         id: 'test-user-uid',
         userId: 'test-user-uid',
@@ -173,7 +213,7 @@ class AuthProvider extends ChangeNotifier {
       if (credential != null && credential.user != null) {
         final uid = credential.user!.uid;
         _profile = await _supabaseService.getProfile(uid);
-        
+
         // If profile doesn't exist, create it
         if (_profile == null && _supabaseService.isUuid(uid)) {
           final now = DateTime.now();
@@ -185,7 +225,9 @@ class AuthProvider extends ChangeNotifier {
             createdAt: now,
             updatedAt: now,
           );
-          await _supabaseService.client.from('profiles').insert(newProfile.toMap());
+          await _supabaseService.client
+              .from('profiles')
+              .insert(newProfile.toMap());
           _profile = newProfile;
         }
       }
@@ -235,7 +277,9 @@ class AuthProvider extends ChangeNotifier {
     }
 
     if (!_supabaseService.isUuid(_user!.uid)) {
-      print('Firebase UID is not a UUID (${_user!.uid}); skipping profile update.');
+      print(
+        'Firebase UID is not a UUID (${_user!.uid}); skipping profile update.',
+      );
       return false;
     }
 
@@ -245,8 +289,11 @@ class AuthProvider extends ChangeNotifier {
         'job_title': jobTitle,
         'updated_at': DateTime.now().toIso8601String(),
       };
-      
-      await _supabaseService.client.from('profiles').update(updates).eq('user_id', _user!.uid);
+
+      await _supabaseService.client
+          .from('profiles')
+          .update(updates)
+          .eq('user_id', _user!.uid);
       _profile = await _supabaseService.getProfile(_user!.uid);
       notifyListeners();
       return true;

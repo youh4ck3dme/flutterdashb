@@ -27,26 +27,27 @@ class AppTheme {
       fontWeight: fontWeight,
     );
   }
+
   // Theme colors
-  static const Color background = Color(0xFF030303);
-  static const Color cardBg = Color(0x12FFFFFF); // Frosted white transparency
-  static const Color border = Color(0x1AFFFFFF); // 10% white border
-  static const Color textPrimary = Color(0xFFF3F4F6);
-  static const Color textSecondary = Color(0xFF9CA3AF);
-  static const Color primary = Color(0xFF6366F1); // Indigo
-  static const Color success = Color(0xFF10B981); // Emerald
-  static const Color warning = Color(0xFFF59E0B); // Amber
-  static const Color error = Color(0xFFEF4444); // Red
-  static const Color info = Color(0xFF3B82F6); // Blue
+  static const Color background = Colors.transparent;
+  static const Color cardBg = Color(0x0CFFFFFF);
+  static const Color border = Color(0x1FFFFFFF);
+  static const Color textPrimary = Color(0xF5FFFFFF);
+  static const Color textSecondary = Color(0xADFFFFFF);
+  static const Color primary = Color(0xFF00BCD4);
+  static const Color success = Color(0xFF34A853);
+  static const Color warning = Color(0xFFFBBC04);
+  static const Color error = Color(0xFFEA4335);
+  static const Color info = Color(0xFF4285F4);
 
   // Status colors matching React project
   static const Map<String, Color> statusColors = {
-    'new': Color(0xFF3B82F6),        // Blue
-    'assigned': Color(0xFF6366F1),   // Indigo/Primary
-    'in_progress': Color(0xFFF59E0B),// Warning/Amber
-    'testing': Color(0xFF9333EA),    // Purple
-    'resolved': Color(0xFF10B981),   // Success/Green
-    'closed': Color(0xFF6B7280),     // Muted Gray
+    'new': Color(0xFF3B82F6),
+    'assigned': Color(0xFF6366F1),
+    'in_progress': Color(0xFFF59E0B),
+    'testing': Color(0xFF9333EA),
+    'resolved': Color(0xFF10B981),
+    'closed': Color(0xFF6B7280),
   };
 
   static const Map<String, String> statusLabels = {
@@ -60,10 +61,10 @@ class AppTheme {
 
   // Severity colors matching React project
   static const Map<String, Color> severityColors = {
-    'critical': Color(0xFFEF4444),   // Red
-    'high': Color(0xFFF97316),       // Orange
-    'medium': Color(0xFFEAB308),     // Yellow
-    'low': Color(0xFF3B82F6),        // Blue
+    'critical': Color(0xFFEF4444),
+    'high': Color(0xFFF97316),
+    'medium': Color(0xFFEAB308),
+    'low': Color(0xFF3B82F6),
   };
 
   static const Map<String, String> severityLabels = {
@@ -73,11 +74,11 @@ class AppTheme {
     'low': 'Nízka',
   };
 
-  // Glassmorphic Decoration
+  // Glassmorphic Decoration — matching wallpaper style
   static BoxDecoration glassDecoration({
     double borderRadius = 12.0,
-    Color bgColor = const Color(0x0EFFFFFF),
-    Color borderColor = const Color(0x15FFFFFF),
+    Color bgColor = const Color(0x0DFFFFFF),
+    Color borderColor = const Color(0x1FFFFFFF),
   }) {
     return BoxDecoration(
       color: bgColor,
@@ -99,13 +100,15 @@ class AppTheme {
   static ThemeData get darkTheme {
     return ThemeData(
       brightness: Brightness.dark,
-      scaffoldBackgroundColor: background,
+      scaffoldBackgroundColor: Colors.transparent,
       colorScheme: const ColorScheme.dark(
         primary: primary,
         secondary: success,
-        background: background,
         surface: cardBg,
         error: error,
+        onPrimary: Colors.white,
+        onSurface: textPrimary,
+        onError: Colors.white,
       ),
       textTheme: TextTheme(
         headlineLarge: _getTextStyle(
@@ -151,6 +154,80 @@ class AppTheme {
           side: const BorderSide(color: border, width: 1),
         ),
       ),
+      iconTheme: const IconThemeData(color: textPrimary),
+      appBarTheme: const AppBarTheme(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: IconThemeData(color: textPrimary),
+      ),
     );
   }
+
+  // Light ThemeData
+  static ThemeData get lightTheme {
+    return ThemeData(
+      brightness: Brightness.light,
+      scaffoldBackgroundColor: Colors.transparent,
+      colorScheme: const ColorScheme.light(
+        primary: primary,
+        secondary: success,
+        surface: Color(0xFFFFFFFF),
+        error: error,
+        onPrimary: Colors.white,
+        onSurface: Color(0xFF1F1F1F),
+        onError: Colors.white,
+      ),
+      textTheme: TextTheme(
+        headlineLarge: _getTextStyle(
+          GoogleFonts.outfit,
+          color: const Color(0xFF1F1F1F),
+          fontSize: 28,
+          fontWeight: FontWeight.bold,
+        ),
+        headlineMedium: _getTextStyle(
+          GoogleFonts.outfit,
+          color: const Color(0xFF1F1F1F),
+          fontSize: 22,
+          fontWeight: FontWeight.w600,
+        ),
+        titleMedium: _getTextStyle(
+          GoogleFonts.outfit,
+          color: const Color(0xFF1F1F1F),
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+        ),
+        bodyLarge: _getTextStyle(
+          GoogleFonts.inter,
+          color: const Color(0xFF1F1F1F),
+          fontSize: 14,
+        ),
+        bodyMedium: _getTextStyle(
+          GoogleFonts.inter,
+          color: const Color(0xFF616161),
+          fontSize: 13,
+        ),
+        labelLarge: _getTextStyle(
+          GoogleFonts.inter,
+          color: const Color(0xFF1F1F1F),
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      dividerColor: const Color(0xFFE0E0E0),
+      cardTheme: CardThemeData(
+        color: const Color(0xFFFFFFFF),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: const Color(0xFFE0E0E0).withValues(alpha: 0.2), width: 1),
+        ),
+      ),
+      iconTheme: const IconThemeData(color: Color(0xFF1F1F1F)),
+      appBarTheme: const AppBarTheme(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: IconThemeData(color: Color(0xFF1F1F1F)),
+      ),
+    );
+  }
+
 }

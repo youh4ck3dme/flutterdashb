@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../core/auth_provider.dart';
 import '../../core/theme.dart';
+import '../../components/premium_background.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -11,7 +12,8 @@ class AuthScreen extends StatefulWidget {
   State<AuthScreen> createState() => _AuthScreenState();
 }
 
-class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateMixin {
+class _AuthScreenState extends State<AuthScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final _formKeyLogin = GlobalKey<FormState>();
   final _formKeySignup = GlobalKey<FormState>();
@@ -43,7 +45,11 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
     super.dispose();
   }
 
-  void _showToast(BuildContext context, String message, {bool isError = false}) {
+  void _showToast(
+    BuildContext context,
+    String message, {
+    bool isError = false,
+  }) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
@@ -70,7 +76,11 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
       if (success) {
         _showToast(context, 'Vitajte späť!');
       } else {
-        _showToast(context, authProvider.error ?? 'Prihlásenie zlyhalo.', isError: true);
+        _showToast(
+          context,
+          authProvider.error ?? 'Prihlásenie zlyhalo.',
+          isError: true,
+        );
       }
     }
   }
@@ -97,7 +107,11 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
       if (success) {
         _showToast(context, 'Účet bol úspešne vytvorený.');
       } else {
-        _showToast(context, authProvider.error ?? 'Registrácia zlyhala.', isError: true);
+        _showToast(
+          context,
+          authProvider.error ?? 'Registrácia zlyhala.',
+          isError: true,
+        );
       }
     }
   }
@@ -113,15 +127,19 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
       if (success) {
         _showToast(context, 'Vitajte späť!');
       } else {
-        _showToast(context, authProvider.error ?? 'Prihlásenie cez Google zlyhalo.', isError: true);
+        _showToast(
+          context,
+          authProvider.error ?? 'Prihlásenie cez Google zlyhalo.',
+          isError: true,
+        );
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
+    return PremiumBackground(
+      child: Center(
         child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(24.0),
@@ -144,7 +162,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                       Container(
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
-                          color: AppTheme.primary.withOpacity(0.15),
+                          color: AppTheme.primary.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: const Icon(
@@ -165,7 +183,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                     ],
                   ),
                   const SizedBox(height: 8),
-                  const Text(
+                  Text(
                     'Sleduj, prioritizuj a rieš chyby',
                     style: TextStyle(
                       fontSize: 13,
@@ -191,15 +209,13 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                               height: 16,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : Image.network(
-                              'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/24px-Google_%22G%22_logo.svg.png',
-                              height: 16,
-                              errorBuilder: (context, error, stackTrace) =>
-                                  const Icon(Icons.public, size: 16),
-                            ),
-                      label: const Text(
+                          : const _GoogleGlyph(),
+                      label: Text(
                         'Pokračovať cez Google',
-                        style: TextStyle(fontSize: 13, color: AppTheme.textPrimary),
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: AppTheme.textPrimary,
+                        ),
                       ),
                       onPressed: (_isSubmitting || _isGoogleLoading)
                           ? null
@@ -209,7 +225,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                   const SizedBox(height: 20),
 
                   // Divider
-                  const Row(
+                  Row(
                     children: [
                       Expanded(child: Divider(color: Color(0x1FFFFFFF))),
                       Padding(
@@ -277,7 +293,8 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                                   controller: _emailLoginController,
                                   placeholder: 'you@example.com',
                                   keyboardType: TextInputType.emailAddress,
-                                  validator: (v) => (v == null || !v.contains('@'))
+                                  validator: (v) =>
+                                      (v == null || !v.contains('@'))
                                       ? 'Zadajte platný e-mail'
                                       : null,
                                 ),
@@ -303,7 +320,8 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                                         borderRadius: BorderRadius.circular(8),
                                       ),
                                     ),
-                                    onPressed: (_isSubmitting || _isGoogleLoading)
+                                    onPressed:
+                                        (_isSubmitting || _isGoogleLoading)
                                         ? null
                                         : _handleLogin,
                                     child: _isSubmitting
@@ -342,7 +360,8 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                                   controller: _emailSignupController,
                                   placeholder: 'you@example.com',
                                   keyboardType: TextInputType.emailAddress,
-                                  validator: (v) => (v == null || !v.contains('@'))
+                                  validator: (v) =>
+                                      (v == null || !v.contains('@'))
                                       ? 'Zadajte platný e-mail'
                                       : null,
                                 ),
@@ -368,7 +387,8 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                                         borderRadius: BorderRadius.circular(8),
                                       ),
                                     ),
-                                    onPressed: (_isSubmitting || _isGoogleLoading)
+                                    onPressed:
+                                        (_isSubmitting || _isGoogleLoading)
                                         ? null
                                         : _handleSignup,
                                     child: _isSubmitting
@@ -394,7 +414,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                   const SizedBox(height: 24),
                   Text(
                     '© ${DateTime.now().year} Triage',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 11,
                       color: AppTheme.textSecondary,
                     ),
@@ -421,7 +441,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 11,
             color: AppTheme.textSecondary,
             fontWeight: FontWeight.w500,
@@ -433,10 +453,13 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
           obscureText: obscureText,
           keyboardType: keyboardType,
           validator: validator,
-          style: const TextStyle(fontSize: 13, color: AppTheme.textPrimary),
+          style: TextStyle(fontSize: 13, color: AppTheme.textPrimary),
           decoration: InputDecoration(
             isDense: true,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 10,
+            ),
             hintText: placeholder,
             hintStyle: const TextStyle(color: Color(0x44FFFFFF), fontSize: 13),
             filled: true,
@@ -461,6 +484,32 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
           ),
         ),
       ],
+    );
+  }
+}
+
+class _GoogleGlyph extends StatelessWidget {
+  const _GoogleGlyph();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 18,
+      height: 18,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(9),
+      ),
+      child: const Text(
+        'G',
+        style: TextStyle(
+          color: Color(0xFF4285F4),
+          fontSize: 12,
+          fontWeight: FontWeight.w800,
+          height: 1,
+        ),
+      ),
     );
   }
 }

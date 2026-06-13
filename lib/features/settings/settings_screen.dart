@@ -1,8 +1,10 @@
+// ignore_for_file: use_build_context_synchronously
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../core/auth_provider.dart';
 import '../../core/theme.dart';
+import '../../core/theme_provider.dart';
 import '../../core/config.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -82,7 +84,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
               const SizedBox(height: 4),
-              const Text(
+              Text(
                 'Spravujte svoj profil a skontrolujte konfiguráciu systémových integrácií.',
                 style: TextStyle(color: AppTheme.textSecondary, fontSize: 12),
               ),
@@ -92,7 +94,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               _buildSectionHeader('Môj profil'),
               Container(
                 decoration: AppTheme.glassDecoration(),
-                padding: const EdgeInsets.all(20),
+                padding: EdgeInsets.all(20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -106,7 +108,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         fillColor: const Color(0x02FFFFFF),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16),
 
                     // Full name
                     _buildLabel('Celé meno *'),
@@ -116,7 +118,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       decoration: _buildInputDecoration('Meno a priezvisko...'),
                       validator: (v) => (v == null || v.trim().isEmpty) ? 'Meno je povinné' : null,
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16),
 
                     // Job Title
                     _buildLabel('Pracovná pozícia'),
@@ -151,6 +153,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
               const SizedBox(height: 24),
 
+              // Theme Settings
+              _buildSectionHeader('Vzhľad aplikácie'),
+              Container(
+                decoration: AppTheme.glassDecoration(),
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  children: [
+                    _buildThemeToggle(),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+
               // System integrations status
               _buildSectionHeader('Systémové integrácie'),
               Container(
@@ -169,7 +184,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       AppConfig.supabaseUrl.isNotEmpty,
                       'Endpoint: ${AppConfig.supabaseUrl}',
                     ),
-                    const Divider(color: Color(0x10FFFFFF), height: 24),
+                    Divider(color: Color(0x10FFFFFF), height: 24),
                     _buildStatusRow(
                       'WordPress REST Gateway',
                       AppConfig.wordpressPublicSiteUrl.isNotEmpty,
@@ -180,7 +195,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: 40),
+              SizedBox(height: 40),
             ],
           ),
         ),
@@ -195,6 +210,51 @@ class _SettingsScreenState extends State<SettingsScreen> {
         text,
         style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppTheme.textSecondary),
       ),
+    );
+  }
+
+  Widget _buildThemeToggle() {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            'Režim témy',
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              fontSize: 14,
+            ),
+          ),
+        ),
+        SegmentedButton<ThemeMode>(
+          segments: [
+            ButtonSegment<ThemeMode>(
+              value: ThemeMode.light,
+              icon: Icon(LucideIcons.sun, size: 16),
+              tooltip: 'Svetlý režim',
+            ),
+            ButtonSegment<ThemeMode>(
+              value: ThemeMode.dark,
+              icon: Icon(LucideIcons.moon, size: 16),
+              tooltip: 'Tmavý režim',
+            ),
+          ],
+          selected: <ThemeMode>{themeProvider.themeMode},
+          onSelectionChanged: (Set<ThemeMode> newSelection) {
+            final mode = newSelection.first;
+            themeProvider.setThemeMode(mode);
+          },
+          style: SegmentedButton.styleFrom(
+            backgroundColor: Theme.of(context).colorScheme.surface.withValues(alpha: 0.1),
+            selectedBackgroundColor: AppTheme.primary.withValues(alpha: 0.2),
+            foregroundColor: Theme.of(context).colorScheme.onSurface,
+            selectedForegroundColor: AppTheme.primary,
+            side: BorderSide(
+              color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -261,7 +321,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
-            color: active ? AppTheme.success.withOpacity(0.1) : AppTheme.error.withOpacity(0.1),
+            color: active ? AppTheme.success.withValues(alpha: 0.1) : AppTheme.error.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(4),
           ),
           child: Text(

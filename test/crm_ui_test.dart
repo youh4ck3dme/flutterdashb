@@ -10,20 +10,6 @@ import 'package:centralny_dashboard/core/isar_service.dart';
 import 'package:centralny_dashboard/features/crm/providers/crm_provider.dart';
 import 'package:centralny_dashboard/features/crm/screens/crm_dashboard_screen.dart';
 
-Future<void> _pumpUntilFound(
-  WidgetTester tester,
-  Finder finder, {
-  int maxPumps = 50,
-}) async {
-  for (int i = 0; i < maxPumps; i++) {
-    await tester.pump(const Duration(milliseconds: 100));
-    if (tester.any(finder)) {
-      return;
-    }
-  }
-  throw TestFailure('Timed out waiting for widget: $finder');
-}
-
 void main() {
   group('CRM UI & Widget Tests', () {
     setUpAll(() async {

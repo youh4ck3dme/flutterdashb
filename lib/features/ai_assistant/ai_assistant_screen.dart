@@ -1,3 +1,4 @@
+// ignore_for_file: avoid_print
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -335,14 +336,14 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
   Widget _buildSidebar() {
     return Container(
       width: 250,
-      color: Colors.black.withOpacity(0.1),
+      color: Colors.black.withValues(alpha: 0.1),
       child: Column(
         children: [
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.primary.withOpacity(0.15),
+                backgroundColor: AppTheme.primary.withValues(alpha: 0.15),
                 foregroundColor: Colors.white,
                 minimumSize: const Size(double.infinity, 40),
                 shape: RoundedRectangleBorder(
@@ -376,7 +377,7 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
                                 : null,
                             child: Row(
                               children: [
-                                const Icon(LucideIcons.messageSquare, size: 14, color: AppTheme.textSecondary),
+                                Icon(LucideIcons.messageSquare, size: 14, color: AppTheme.textSecondary),
                                 const SizedBox(width: 10),
                                 Expanded(
                                   child: Text(
@@ -421,13 +422,13 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'AI Asistent',
                     style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
                   ),
                   Text(
                     _activeConversation != null ? 'Položte otázku o nahlásených chybách' : 'Rýchla analýza a prehľad',
-                    style: const TextStyle(fontSize: 10, color: AppTheme.textSecondary),
+                    style: TextStyle(fontSize: 10, color: AppTheme.textSecondary),
                   ),
                 ],
               ),
@@ -496,16 +497,16 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
         children: [
           CircleAvatar(
             radius: 30,
-            backgroundColor: AppTheme.primary.withOpacity(0.1),
+            backgroundColor: AppTheme.primary.withValues(alpha: 0.1),
             child: const Icon(LucideIcons.bot, color: AppTheme.primary, size: 30),
           ),
           const SizedBox(height: 16),
-          const Text(
+          Text(
             'Vitajte v AI Asistentovi',
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
           ),
           const SizedBox(height: 6),
-          const Text(
+          Text(
             'Môžete klásť otázky o svojich projektoch a nahlásených chybách.',
             style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
             textAlign: TextAlign.center,
@@ -568,7 +569,7 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: TextField(
                     controller: _msgController,
-                    style: const TextStyle(fontSize: 13, color: AppTheme.textPrimary),
+                    style: TextStyle(fontSize: 13, color: AppTheme.textPrimary),
                     onSubmitted: (_) => _sendMessage(),
                     decoration: const InputDecoration(
                       hintText: 'Položte otázku...',
@@ -601,14 +602,14 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(LucideIcons.bot, color: AppTheme.textSecondary, size: 30),
+            Icon(LucideIcons.bot, color: AppTheme.textSecondary, size: 30),
             const SizedBox(height: 12),
-            const Text(
+            Text(
               'Konverzácia je prázdna',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppTheme.textPrimary),
             ),
             const SizedBox(height: 4),
-            const Text(
+            Text(
               'Položte prvú otázku! Napr.: „Koľko kritických chýb máme?“',
               style: TextStyle(fontSize: 11, color: AppTheme.textSecondary),
               textAlign: TextAlign.center,
@@ -629,7 +630,7 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
           if (!isUser) ...[
             CircleAvatar(
               radius: 14,
-              backgroundColor: AppTheme.primary.withOpacity(0.2),
+              backgroundColor: AppTheme.primary.withValues(alpha: 0.2),
               child: const Icon(LucideIcons.bot, color: AppTheme.primary, size: 14),
             ),
             const SizedBox(width: 8),
@@ -664,7 +665,7 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
             CircleAvatar(
               radius: 14,
               backgroundColor: const Color(0x0EFFFFFF),
-              child: const Icon(LucideIcons.user, color: AppTheme.textSecondary, size: 14),
+              child: Icon(LucideIcons.user, color: AppTheme.textSecondary, size: 14),
             ),
           ],
         ],

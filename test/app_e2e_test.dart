@@ -22,6 +22,40 @@ Future<void> _pumpUntilFound(
   throw TestFailure('Timed out waiting for widget: $finder');
 }
 
+Future<void> _pumpFor(
+  WidgetTester tester, [
+  Duration duration = const Duration(milliseconds: 300),
+]) async {
+  final frames = (duration.inMilliseconds / 50).ceil().clamp(1, 200);
+  for (var i = 0; i < frames; i++) {
+    await tester.pump(const Duration(milliseconds: 50));
+  }
+}
+
+Future<void> _tapSidebarItem(WidgetTester tester, String label) async {
+  final sidebarListView = find.byType(ListView).first;
+
+  for (var attempt = 0; attempt < 10; attempt++) {
+    final item = find.descendant(
+      of: sidebarListView,
+      matching: find.text(label),
+    );
+    if (item.evaluate().isNotEmpty) {
+      final tile = find
+          .ancestor(of: item, matching: find.byType(InkWell))
+          .first;
+      await tester.tap(tile);
+      await _pumpFor(tester);
+      return;
+    }
+
+    await tester.drag(sidebarListView, const Offset(0, -220));
+    await _pumpFor(tester);
+  }
+
+  throw TestFailure('Timed out waiting for sidebar item: $label');
+}
+
 void main() {
   group('Centralny Dashboard E2E Headless Tests', () {
     setUpAll(() async {
@@ -45,14 +79,16 @@ void main() {
       (WidgetTester tester) async {
         tester.view.physicalSize = const Size(1280, 800);
         tester.view.devicePixelRatio = 1.0;
-        addTearDown(() {
+        addTearDown(() async {
+          await tester.pumpWidget(const SizedBox.shrink());
+          await tester.pump();
           tester.view.resetPhysicalSize();
           tester.view.resetDevicePixelRatio();
         });
 
         // 1. Start the application
         app.main();
-        await tester.pumpAndSettle();
+        await _pumpUntilFound(tester, find.text('Prihlásenie'));
 
         // Verify we are on the login screen
         expect(find.text('Prihlásenie'), findsOneWidget);
@@ -71,7 +107,7 @@ void main() {
 
         await tester.enterText(emailField, 'test@example.com');
         await tester.enterText(passwordField, 'password123');
-        await tester.pumpAndSettle();
+        await _pumpFor(tester);
 
         // Tap login button
         final loginBtn = find.widgetWithText(ElevatedButton, 'Prihlásiť sa');
@@ -79,7 +115,7 @@ void main() {
         await tester.tap(loginBtn);
 
         // Wait for login process and transition to Dashboard
-        await tester.pumpAndSettle(const Duration(milliseconds: 500));
+        await _pumpUntilFound(tester, find.text('Prehľad'));
 
         // Verify we are now logged in and looking at the Dashboard
         expect(find.text('Prehľad'), findsAtLeastNWidgets(1));
@@ -91,7 +127,7 @@ void main() {
           'Nahlásiť chybu',
         );
         await tester.tap(reportBugBtn);
-        await tester.pumpAndSettle();
+        await _pumpFor(tester);
 
         // Fill bug form details
         final titleField = find.byWidgetPredicate(
@@ -110,7 +146,7 @@ void main() {
           descField,
           'This bug was created automatically by our E2E test suite.',
         );
-        await tester.pumpAndSettle();
+        await _pumpFor(tester);
 
         // Submit bug
         final submitBugBtn = find.widgetWithText(
@@ -125,24 +161,19 @@ void main() {
           tester,
           find.text('Chyba bola úspešne nahlásená'),
         );
-        await tester
-            .pumpAndSettle(); // Wait for navigation transition to complete
+        await _pumpFor(tester);
 
         // Clear all snackbars so they don't block hit testing of inputs/buttons at the bottom
         final BuildContext context = tester.element(find.byType(app.AuthGate));
         ScaffoldMessenger.of(context).clearSnackBars();
-        await tester.pumpAndSettle();
+        await _pumpFor(tester);
 
         // Verify the new bug is displayed in the list/table
         expect(find.text('E2E Test Bug Title'), findsOneWidget);
 
         // 4. Navigate to AI Assistant
-        final aiSidebarItem = find.descendant(
-          of: find.byType(ListView),
-          matching: find.text('AI Asistent'),
-        );
-        await tester.tap(aiSidebarItem);
-        await tester.pumpAndSettle();
+        await _tapSidebarItem(tester, 'AI Asistent');
+        await _pumpUntilFound(tester, find.text('Optimalizácia Isar databázy'));
 
         // Verify we are in AI Assistant view
         expect(find.text('AI Asistent'), findsAtLeastNWidgets(1));
@@ -155,11 +186,12 @@ void main() {
           (w) =>
               w is TextField && w.decoration?.hintText == 'Položte otázku...',
         );
+        await _pumpUntilFound(tester, aiInputField);
         await tester.enterText(
           aiInputField,
           'How do I optimize local storage?',
         );
-        await tester.pumpAndSettle();
+        await _pumpFor(tester);
 
         // Send the message
         final sendBtn = find.byIcon(LucideIcons.send);
@@ -171,7 +203,7 @@ void main() {
           tester,
           find.textContaining('Toto je simulovaná odpoveď na:'),
         );
-        await tester.pumpAndSettle();
+        await _pumpFor(tester);
 
         // Verify mock response is visible on the screen
         expect(
@@ -180,12 +212,8 @@ void main() {
         );
 
         // 5. Navigate to Settings
-        final settingsSidebarItem = find.descendant(
-          of: find.byType(ListView),
-          matching: find.text('Nastavenia'),
-        );
-        await tester.tap(settingsSidebarItem);
-        await tester.pumpAndSettle();
+        await _tapSidebarItem(tester, 'Nastavenia');
+        await _pumpUntilFound(tester, find.text('Môj profil'));
 
         // Verify settings screen is active
         expect(find.text('Nastavenia'), findsAtLeastNWidgets(1));
@@ -198,7 +226,7 @@ void main() {
               w.decoration?.hintText == 'Meno a priezvisko...',
         );
         await tester.enterText(nameField, 'E2E Updated User Name');
-        await tester.pumpAndSettle();
+        await _pumpFor(tester);
 
         // Click save profile button
         final saveSettingsBtn = find.widgetWithText(
@@ -210,17 +238,17 @@ void main() {
 
         // Wait for success snackbar asynchronously
         await _pumpUntilFound(tester, find.text('Profil úspešne uložený'));
-        await tester.pumpAndSettle();
+        await _pumpFor(tester);
 
         // Clear all snackbars
         ScaffoldMessenger.of(context).clearSnackBars();
-        await tester.pumpAndSettle();
+        await _pumpFor(tester);
 
         // 6. Sign out
         final logoutIcon = find.byIcon(LucideIcons.logOut);
         await tester.ensureVisible(logoutIcon.last);
         await tester.tap(logoutIcon.last);
-        await tester.pumpAndSettle();
+        await _pumpUntilFound(tester, find.text('Prihlásenie'));
 
         // Verify we are back to the AuthScreen
         expect(find.text('Prihlásenie'), findsOneWidget);
@@ -232,13 +260,15 @@ void main() {
     ) async {
       tester.view.physicalSize = const Size(1280, 800);
       tester.view.devicePixelRatio = 1.0;
-      addTearDown(() {
+      addTearDown(() async {
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pump();
         tester.view.resetPhysicalSize();
         tester.view.resetDevicePixelRatio();
       });
 
       app.main();
-      await tester.pumpAndSettle();
+      await _pumpUntilFound(tester, find.text('Prihlásenie'));
 
       // Perform login
       final emailField = find.byWidgetPredicate(
@@ -249,11 +279,11 @@ void main() {
       );
       await tester.enterText(emailField, 'test@example.com');
       await tester.enterText(passwordField, 'password123');
-      await tester.pumpAndSettle();
+      await _pumpFor(tester);
 
       final loginBtn = find.widgetWithText(ElevatedButton, 'Prihlásiť sa');
       await tester.tap(loginBtn);
-      await tester.pumpAndSettle(const Duration(milliseconds: 500));
+      await _pumpUntilFound(tester, find.text('Prehľad'));
 
       // Verify side navigation is populated with all sections
       final sidebarListView = find.byType(ListView).first;
@@ -272,6 +302,34 @@ void main() {
         ),
         findsOneWidget,
       );
+      expect(
+        find.descendant(of: sidebarListView, matching: find.text('CRM')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: sidebarListView,
+          matching: find.text('Email Sender'),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: sidebarListView, matching: find.text('Blueprints')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: sidebarListView, matching: find.text('IČO Atlas')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: sidebarListView,
+          matching: find.text('H4CK Arsenal'),
+        ),
+        findsOneWidget,
+      );
+      await tester.drag(sidebarListView, const Offset(0, -360));
+      await _pumpFor(tester);
       expect(
         find.descendant(of: sidebarListView, matching: find.text('Analytika')),
         findsOneWidget,
@@ -298,14 +356,16 @@ void main() {
       (WidgetTester tester) async {
         tester.view.physicalSize = const Size(1280, 800);
         tester.view.devicePixelRatio = 1.0;
-        addTearDown(() {
+        addTearDown(() async {
+          await tester.pumpWidget(const SizedBox.shrink());
+          await tester.pump();
           tester.view.resetPhysicalSize();
           tester.view.resetDevicePixelRatio();
         });
 
         // 1. Start the application
         app.main();
-        await tester.pumpAndSettle();
+        await _pumpUntilFound(tester, find.text('Prihlásenie'));
 
         // Verify we are on the login screen
         expect(find.text('Prihlásenie'), findsOneWidget);
@@ -321,7 +381,7 @@ void main() {
         await tester.tap(googleLoginBtn);
 
         // Wait for login process and transition to Dashboard
-        await tester.pumpAndSettle(const Duration(milliseconds: 500));
+        await _pumpUntilFound(tester, find.text('Prehľad'));
 
         // Verify we are now logged in and looking at the Dashboard
         expect(find.text('Prehľad'), findsAtLeastNWidgets(1));
@@ -332,13 +392,13 @@ void main() {
         // Clear all snackbars
         final BuildContext context = tester.element(find.byType(app.AuthGate));
         ScaffoldMessenger.of(context).clearSnackBars();
-        await tester.pumpAndSettle();
+        await _pumpFor(tester);
 
         // Sign out
         final logoutIcon = find.byIcon(LucideIcons.logOut);
         await tester.ensureVisible(logoutIcon.last);
         await tester.tap(logoutIcon.last);
-        await tester.pumpAndSettle();
+        await _pumpUntilFound(tester, find.text('Prihlásenie'));
 
         // Verify we are back to the AuthScreen
         expect(find.text('Prihlásenie'), findsOneWidget);

@@ -1,3 +1,4 @@
+// ignore_for_file: use_build_context_synchronously
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -127,7 +128,7 @@ class _CrmDashboardScreenState extends State<CrmDashboardScreen> {
             Expanded(
               flex: 4,
               child: Container(
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   color: Color(0xFF0F0F12),
                   border: Border(
                     left: BorderSide(color: AppTheme.border, width: 1),
@@ -142,7 +143,7 @@ class _CrmDashboardScreenState extends State<CrmDashboardScreen> {
       bottomSheet: (!isLargeScreen && _selectedClient != null)
           ? Container(
               height: MediaQuery.of(context).size.height * 0.75,
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: Color(0xFF0F0F12),
                 borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                 border: Border(top: BorderSide(color: AppTheme.border)),
@@ -184,7 +185,7 @@ class _CrmDashboardScreenState extends State<CrmDashboardScreen> {
               const SizedBox(height: 4),
               Text(
                 'Offline-first správa klientov a úloh (${crmProvider.clients.where((c) => c.deletedAt == null).length})',
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppTheme.textSecondary,
                   fontSize: 14,
                 ),
@@ -225,18 +226,18 @@ class _CrmDashboardScreenState extends State<CrmDashboardScreen> {
               _searchQuery = val;
             });
           },
-          style: const TextStyle(color: AppTheme.textPrimary, fontSize: 14),
+          style: TextStyle(color: AppTheme.textPrimary, fontSize: 14),
           decoration: InputDecoration(
             hintText: 'Hľadať podľa názvu, emailu alebo kontaktu...',
             hintStyle: const TextStyle(color: Colors.white30, fontSize: 14),
-            prefixIcon: const Icon(
+            prefixIcon: Icon(
               LucideIcons.search,
               color: AppTheme.textSecondary,
               size: 18,
             ),
             suffixIcon: _searchQuery.isNotEmpty
                 ? IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.clear,
                       color: AppTheme.textSecondary,
                       size: 18,
@@ -250,15 +251,15 @@ class _CrmDashboardScreenState extends State<CrmDashboardScreen> {
                   )
                 : null,
             filled: true,
-            fillColor: Colors.white.withOpacity(0.03),
+            fillColor: Colors.white.withValues(alpha: 0.03),
             contentPadding: const EdgeInsets.symmetric(vertical: 12),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: AppTheme.border),
+              borderSide: BorderSide(color: AppTheme.border),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: AppTheme.border),
+              borderSide: BorderSide(color: AppTheme.border),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
@@ -301,8 +302,8 @@ class _CrmDashboardScreenState extends State<CrmDashboardScreen> {
         ),
       ),
       selected: isSelected,
-      selectedColor: AppTheme.primary.withOpacity(0.3),
-      backgroundColor: Colors.white.withOpacity(0.02),
+      selectedColor: AppTheme.primary.withValues(alpha: 0.3),
+      backgroundColor: Colors.white.withValues(alpha: 0.02),
       onSelected: (val) {
         if (val) {
           setState(() {
@@ -328,7 +329,7 @@ class _CrmDashboardScreenState extends State<CrmDashboardScreen> {
           Icon(
             LucideIcons.users,
             size: 48,
-            color: Colors.white.withOpacity(0.2),
+            color: Colors.white.withValues(alpha: 0.2),
           ),
           const SizedBox(height: 16),
           Text(
@@ -336,7 +337,7 @@ class _CrmDashboardScreenState extends State<CrmDashboardScreen> {
                 ? 'Nenašli sa žiadni vyhovujúci klienti'
                 : 'Žiadni CRM klienti v systéme',
             style: TextStyle(
-              color: Colors.white.withOpacity(0.6),
+              color: Colors.white.withValues(alpha: 0.6),
               fontSize: 15,
             ),
           ),
@@ -379,7 +380,7 @@ class _CrmDashboardScreenState extends State<CrmDashboardScreen> {
             ? AppTheme.activeGlassDecoration(borderRadius: 12)
             : AppTheme.glassDecoration(
                 borderRadius: 12,
-                borderColor: Colors.white.withOpacity(0.05),
+                borderColor: Colors.white.withValues(alpha: 0.05),
               ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -390,7 +391,7 @@ class _CrmDashboardScreenState extends State<CrmDashboardScreen> {
                 Expanded(
                   child: Text(
                     client.companyName,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                       color: AppTheme.textPrimary,
@@ -406,10 +407,10 @@ class _CrmDashboardScreenState extends State<CrmDashboardScreen> {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.12),
+                    color: statusColor.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(4),
                     border: Border.all(
-                      color: statusColor.withOpacity(0.3),
+                      color: statusColor.withValues(alpha: 0.3),
                       width: 1,
                     ),
                   ),
@@ -443,7 +444,7 @@ class _CrmDashboardScreenState extends State<CrmDashboardScreen> {
                 Expanded(
                   child: Text(
                     client.contactName ?? 'Bez kontaktnej osoby',
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppTheme.textSecondary,
                       fontSize: 12,
                     ),
@@ -462,14 +463,14 @@ class _CrmDashboardScreenState extends State<CrmDashboardScreen> {
                 children: [
                   Text(
                     'Úlohy: $doneTasks/$totalTasks',
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppTheme.textSecondary,
                       fontSize: 11,
                     ),
                   ),
                   Text(
                     '${(progress * 100).toInt()}%',
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppTheme.textPrimary,
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
@@ -511,7 +512,7 @@ class _CrmDashboardScreenState extends State<CrmDashboardScreen> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 'Karta Klienta',
                 style: TextStyle(
                   fontSize: 16,
@@ -522,7 +523,7 @@ class _CrmDashboardScreenState extends State<CrmDashboardScreen> {
               Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       LucideIcons.edit,
                       size: 16,
                       color: AppTheme.textSecondary,
@@ -540,7 +541,7 @@ class _CrmDashboardScreenState extends State<CrmDashboardScreen> {
                     onPressed: () => _confirmDeleteClient(client, crmProvider),
                   ),
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.close,
                       size: 20,
                       color: AppTheme.textSecondary,
@@ -556,7 +557,7 @@ class _CrmDashboardScreenState extends State<CrmDashboardScreen> {
             ],
           ),
         ),
-        const Divider(height: 1, color: AppTheme.border),
+        Divider(height: 1, color: AppTheme.border),
 
         // Scrollable Details
         Expanded(
@@ -595,7 +596,7 @@ class _CrmDashboardScreenState extends State<CrmDashboardScreen> {
                 ),
               if (client.notes != null) ...[
                 const SizedBox(height: 12),
-                const Text(
+                Text(
                   'Poznámky:',
                   style: TextStyle(color: AppTheme.textSecondary, fontSize: 11),
                 ),
@@ -603,13 +604,13 @@ class _CrmDashboardScreenState extends State<CrmDashboardScreen> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.03),
+                    color: Colors.white.withValues(alpha: 0.03),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(color: AppTheme.border),
                   ),
                   child: Text(
                     client.notes!,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppTheme.textPrimary,
                       fontSize: 13,
                     ),
@@ -689,12 +690,12 @@ class _CrmDashboardScreenState extends State<CrmDashboardScreen> {
           const SizedBox(width: 10),
           Text(
             '$label: ',
-            style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+            style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
           ),
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppTheme.textPrimary,
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
@@ -714,23 +715,23 @@ class _CrmDashboardScreenState extends State<CrmDashboardScreen> {
           child: TextField(
             controller: _taskController,
             key: const Key('add_task_input'),
-            style: const TextStyle(color: AppTheme.textPrimary, fontSize: 13),
+            style: TextStyle(color: AppTheme.textPrimary, fontSize: 13),
             decoration: InputDecoration(
               hintText: 'Pridať novú úlohu...',
               hintStyle: const TextStyle(color: Colors.white24, fontSize: 13),
               filled: true,
-              fillColor: Colors.white.withOpacity(0.04),
+              fillColor: Colors.white.withValues(alpha: 0.04),
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 12,
                 vertical: 8,
               ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(6),
-                borderSide: const BorderSide(color: AppTheme.border),
+                borderSide: BorderSide(color: AppTheme.border),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(6),
-                borderSide: const BorderSide(color: AppTheme.border),
+                borderSide: BorderSide(color: AppTheme.border),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(6),
@@ -822,7 +823,7 @@ class _CrmDashboardScreenState extends State<CrmDashboardScreen> {
               child: TextField(
                 controller: _activityController,
                 key: const Key('add_activity_input'),
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppTheme.textPrimary,
                   fontSize: 13,
                 ),
@@ -833,18 +834,18 @@ class _CrmDashboardScreenState extends State<CrmDashboardScreen> {
                     fontSize: 13,
                   ),
                   filled: true,
-                  fillColor: Colors.white.withOpacity(0.04),
+                  fillColor: Colors.white.withValues(alpha: 0.04),
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 12,
                     vertical: 8,
                   ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(6),
-                    borderSide: const BorderSide(color: AppTheme.border),
+                    borderSide: BorderSide(color: AppTheme.border),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(6),
-                    borderSide: const BorderSide(color: AppTheme.border),
+                    borderSide: BorderSide(color: AppTheme.border),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(6),
@@ -863,8 +864,9 @@ class _CrmDashboardScreenState extends State<CrmDashboardScreen> {
                   String title = 'Zaznamenaná aktivita';
                   if (_newActivityType == 'call') title = 'Telefonát';
                   if (_newActivityType == 'email') title = 'E-mail odoslaný';
-                  if (_newActivityType == 'meeting')
+                  if (_newActivityType == 'meeting') {
                     title = 'Osobné stretnutie';
+                  }
                   if (_newActivityType == 'note') title = 'Interná poznámka';
 
                   await crmProvider.addActivity(
@@ -896,8 +898,8 @@ class _CrmDashboardScreenState extends State<CrmDashboardScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppTheme.primary.withOpacity(0.2)
-              : Colors.white.withOpacity(0.02),
+              ? AppTheme.primary.withValues(alpha: 0.2)
+              : Colors.white.withValues(alpha: 0.02),
           borderRadius: BorderRadius.circular(4),
           border: Border.all(
             color: isSelected ? AppTheme.primary : AppTheme.border,
@@ -941,7 +943,7 @@ class _CrmDashboardScreenState extends State<CrmDashboardScreen> {
           Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: iconColor.withOpacity(0.12),
+              color: iconColor.withValues(alpha: 0.12),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, size: 12, color: iconColor),
@@ -956,7 +958,7 @@ class _CrmDashboardScreenState extends State<CrmDashboardScreen> {
                   children: [
                     Text(
                       activity.title,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: AppTheme.textPrimary,
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
@@ -975,7 +977,7 @@ class _CrmDashboardScreenState extends State<CrmDashboardScreen> {
                   const SizedBox(height: 4),
                   Text(
                     activity.content!,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppTheme.textSecondary,
                       fontSize: 12,
                     ),
@@ -1053,17 +1055,17 @@ class _CrmDashboardScreenState extends State<CrmDashboardScreen> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: const Color(0xFF1E1E24),
-        title: const Text(
+        title: Text(
           'Vymazať klienta?',
           style: TextStyle(color: AppTheme.textPrimary),
         ),
         content: Text(
           'Naozaj chcete presunúť klienta "${client.companyName}" do koša?',
-          style: const TextStyle(color: AppTheme.textSecondary),
+          style: TextStyle(color: AppTheme.textSecondary),
         ),
         actions: [
           TextButton(
-            child: const Text(
+            child: Text(
               'Zrušiť',
               style: TextStyle(color: AppTheme.textSecondary),
             ),

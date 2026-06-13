@@ -43,7 +43,7 @@ class _BugDetailScreenState extends State<BugDetailScreen> {
       return Scaffold(
         backgroundColor: AppTheme.background,
         appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0),
-        body: const Center(
+        body: Center(
           child: Text('Chyba nebola nájdená', style: TextStyle(color: AppTheme.textSecondary)),
         ),
       );
@@ -61,7 +61,7 @@ class _BugDetailScreenState extends State<BugDetailScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: Text(bug.trackingId, style: const TextStyle(fontSize: 14, fontFamily: 'monospace', color: AppTheme.textSecondary)),
+        title: Text(bug.trackingId, style: TextStyle(fontSize: 14, fontFamily: 'monospace', color: AppTheme.textSecondary)),
         leading: IconButton(
           icon: const Icon(LucideIcons.arrowLeft, size: 20),
           onPressed: () => Navigator.pop(context),
@@ -100,11 +100,11 @@ class _BugDetailScreenState extends State<BugDetailScreen> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(LucideIcons.folder, size: 10, color: AppTheme.textSecondary),
+                        Icon(LucideIcons.folder, size: 10, color: AppTheme.textSecondary),
                         const SizedBox(width: 4),
                         Text(
                           project.name,
-                          style: const TextStyle(fontSize: 10, color: AppTheme.textSecondary, fontWeight: FontWeight.w500),
+                          style: TextStyle(fontSize: 10, color: AppTheme.textSecondary, fontWeight: FontWeight.w500),
                         ),
                       ],
                     ),
@@ -146,7 +146,7 @@ class _BugDetailScreenState extends State<BugDetailScreen> {
                       _buildGlassCard(
                         child: Text(
                           bug.description,
-                          style: const TextStyle(fontSize: 13, height: 1.5, color: AppTheme.textPrimary),
+                          style: TextStyle(fontSize: 13, height: 1.5, color: AppTheme.textPrimary),
                         ),
                       ),
                       const SizedBox(height: 24),
@@ -157,7 +157,7 @@ class _BugDetailScreenState extends State<BugDetailScreen> {
                         _buildGlassCard(
                           child: Text(
                             bug.stepsToReproduce!,
-                            style: const TextStyle(fontSize: 13, height: 1.5, color: AppTheme.textPrimary),
+                            style: TextStyle(fontSize: 13, height: 1.5, color: AppTheme.textPrimary),
                           ),
                         ),
                         const SizedBox(height: 24),
@@ -178,7 +178,7 @@ class _BugDetailScreenState extends State<BugDetailScreen> {
                                     _buildGlassCard(
                                       child: Text(
                                         bug.expectedBehavior!,
-                                        style: const TextStyle(fontSize: 12, height: 1.4, color: AppTheme.textPrimary),
+                                        style: TextStyle(fontSize: 12, height: 1.4, color: AppTheme.textPrimary),
                                       ),
                                     ),
                                   ],
@@ -198,7 +198,7 @@ class _BugDetailScreenState extends State<BugDetailScreen> {
                                     _buildGlassCard(
                                       child: Text(
                                         bug.actualBehavior!,
-                                        style: const TextStyle(fontSize: 12, height: 1.4, color: AppTheme.textPrimary),
+                                        style: TextStyle(fontSize: 12, height: 1.4, color: AppTheme.textPrimary),
                                       ),
                                     ),
                                   ],
@@ -230,7 +230,7 @@ class _BugDetailScreenState extends State<BugDetailScreen> {
                           return const Text('Načítava sa...', style: TextStyle(fontSize: 12));
                         }
                         final name = snapshot.data?.fullName ?? 'Neznámy používateľ';
-                        return Text(name, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppTheme.textPrimary));
+                        return Text(name, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppTheme.textPrimary));
                       },
                     ),
                   ),
@@ -238,7 +238,7 @@ class _BugDetailScreenState extends State<BugDetailScreen> {
                   _buildDetailRow(
                     'Priradený vývojár',
                     bug.assigneeId == null || bug.assigneeId!.isEmpty
-                        ? const Text('Nepriradené', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary))
+                        ? Text('Nepriradené', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary))
                         : FutureBuilder<Profile?>(
                             future: _supabase.getProfile(bug.assigneeId!),
                             builder: (context, snapshot) {
@@ -246,25 +246,25 @@ class _BugDetailScreenState extends State<BugDetailScreen> {
                                 return const Text('Načítava sa...', style: TextStyle(fontSize: 12));
                               }
                               final name = snapshot.data?.fullName ?? 'Neznámy vývojár';
-                              return Text(name, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppTheme.textPrimary));
+                              return Text(name, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppTheme.textPrimary));
                             },
                           ),
                   ),
                   const Divider(color: Color(0x10FFFFFF), height: 24),
                   _buildDetailRow(
                     'Dátum nahlásenia',
-                    Text(df.format(bug.createdAt), style: const TextStyle(fontSize: 12, color: AppTheme.textPrimary)),
+                    Text(df.format(bug.createdAt), style: TextStyle(fontSize: 12, color: AppTheme.textPrimary)),
                   ),
                   const Divider(color: Color(0x10FFFFFF), height: 24),
                   _buildDetailRow(
                     'Posledná úprava',
-                    Text(df.format(bug.updatedAt), style: const TextStyle(fontSize: 12, color: AppTheme.textPrimary)),
+                    Text(df.format(bug.updatedAt), style: TextStyle(fontSize: 12, color: AppTheme.textPrimary)),
                   ),
                   if (bug.environment != null && bug.environment!.isNotEmpty) ...[
                     const Divider(color: Color(0x10FFFFFF), height: 24),
                     _buildDetailRow(
                       'Prostredie',
-                      Text(bug.environment!, style: const TextStyle(fontSize: 12, color: AppTheme.textPrimary)),
+                      Text(bug.environment!, style: TextStyle(fontSize: 12, color: AppTheme.textPrimary)),
                     ),
                   ],
                 ],
@@ -282,7 +282,7 @@ class _BugDetailScreenState extends State<BugDetailScreen> {
       padding: const EdgeInsets.only(bottom: 8.0, left: 2.0),
       child: Text(
         text,
-        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppTheme.textSecondary),
+        style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppTheme.textSecondary),
       ),
     );
   }
@@ -300,7 +300,7 @@ class _BugDetailScreenState extends State<BugDetailScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+        Text(label, style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
         valueWidget,
       ],
     );
@@ -312,7 +312,7 @@ class _BugDetailScreenState extends State<BugDetailScreen> {
       Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Zmeniť stav', style: TextStyle(fontSize: 10, color: AppTheme.textSecondary)),
+          Text('Zmeniť stav', style: TextStyle(fontSize: 10, color: AppTheme.textSecondary)),
           const SizedBox(height: 6),
           SizedBox(
             width: 160,
@@ -321,7 +321,7 @@ class _BugDetailScreenState extends State<BugDetailScreen> {
                 ? const Center(child: SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 1.5)))
                 : DropdownButtonHideUnderline(
                     child: DropdownButtonFormField<String>(
-                      value: bug.status,
+                      initialValue: bug.status,
                       dropdownColor: const Color(0xFF1E1E22),
                       decoration: const InputDecoration(
                         contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 0),
@@ -351,7 +351,7 @@ class _BugDetailScreenState extends State<BugDetailScreen> {
       Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Zmeniť závažnosť', style: TextStyle(fontSize: 10, color: AppTheme.textSecondary)),
+          Text('Zmeniť závažnosť', style: TextStyle(fontSize: 10, color: AppTheme.textSecondary)),
           const SizedBox(height: 6),
           SizedBox(
             width: 160,
@@ -360,7 +360,7 @@ class _BugDetailScreenState extends State<BugDetailScreen> {
                 ? const Center(child: SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 1.5)))
                 : DropdownButtonHideUnderline(
                     child: DropdownButtonFormField<String>(
-                      value: bug.severity,
+                      initialValue: bug.severity,
                       dropdownColor: const Color(0xFF1E1E22),
                       decoration: const InputDecoration(
                         contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 0),

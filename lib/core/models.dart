@@ -4,6 +4,7 @@ class Profile {
   final String fullName;
   final String? avatarUrl;
   final String? jobTitle;
+  final UserRole role;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -13,6 +14,7 @@ class Profile {
     required this.fullName,
     this.avatarUrl,
     this.jobTitle,
+    this.role = UserRole.guest,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -24,6 +26,7 @@ class Profile {
       fullName: map['full_name'] ?? '',
       avatarUrl: map['avatar_url'],
       jobTitle: map['job_title'],
+      role: UserRoleExtensions.fromString(map['role'] ?? 'guest'),
       createdAt: DateTime.parse(map['created_at'] ?? DateTime.now().toIso8601String()),
       updatedAt: DateTime.parse(map['updated_at'] ?? DateTime.now().toIso8601String()),
     );
@@ -36,6 +39,7 @@ class Profile {
       'full_name': fullName,
       'avatar_url': avatarUrl,
       'job_title': jobTitle,
+      'role': role.name,
     };
   }
 }
@@ -217,9 +221,64 @@ class AiMessage {
   }
 }
 
+/// User roles for role-based access control
+enum UserRole {
+  admin,
+  manager,
+  developer,
+  tester,
+  client,
+  guest,
+}
+
+/// Extension to convert UserRole to string and vice versa
+extension UserRoleExtensions on UserRole {
+  String get displayName {
+    return {
+      UserRole.admin: 'Administrátor',
+      UserRole.manager: 'Manažér',
+      UserRole.developer: 'Vývojár',
+      UserRole.tester: 'Tester',
+      UserRole.client: 'Klient',
+      UserRole.guest: 'Host',
+    }[this] ?? name;
+  }
+
+  static UserRole fromString(String role) {
+    return UserRole.values.firstWhere(
+      (e) => e.name == role.toLowerCase(),
+      orElse: () => UserRole.guest,
+    );
+  }
+}
+
 class AppUser {
   final String uid;
   final String? email;
+  final UserRole role;
 
-  AppUser({required this.uid, this.email});
+  AppUser({required this.uid, this.email, this.role = UserRole.guest});
+
+  /// Check if user has at least the specified role
+  bool hasRole(UserRole requiredRole) {
+    final roleHierarchy = {
+      UserRole.guest: 0,
+      UserRole.client: 1,
+      UserRole.tester: 2,
+      UserRole.developer: 3,
+      UserRole.manager: 4,
+      UserRole.admin: 5,
+    };
+
+    return roleHierarchy[role]! >= roleHierarchy[requiredRole]!;
+  }
+
+  /// Check if user is admin
+  bool get isAdmin => role == UserRole.admin;
+
+  /// Check if user is manager or higher
+  bool get isManager => hasRole(UserRole.manager);
+
+  /// Check if user is developer or higher
+  bool get isDeveloper => hasRole(UserRole.developer);
 }

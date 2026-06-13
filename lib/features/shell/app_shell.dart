@@ -3,7 +3,9 @@ import 'package:provider/provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../core/auth_provider.dart';
 import '../../core/theme.dart';
+import '../../core/theme_provider.dart';
 import '../../core/responsive.dart';
+import '../../components/premium_background.dart';
 
 // Import features as we build them
 import '../dashboard/dashboard_screen.dart';
@@ -14,7 +16,14 @@ import '../ai_assistant/ai_assistant_screen.dart';
 import '../settings/settings_screen.dart';
 import '../changelog/changelog_screen.dart';
 import '../crm/screens/crm_dashboard_screen.dart';
+import '../email_sender/email_sender_screen.dart';
+import '../blueprints/blueprints_screen.dart';
+import '../ico_atlas/ico_atlas_screen.dart';
+import '../h4ck_arsenal/h4ck_arsenal_screen.dart';
 import '../seo_ai/seo_ai_screen.dart';
+import '../video_dashboard/video_screen.dart';
+import '../search/search_screen.dart';
+import '../notifications/notifications_screen.dart';
 
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
@@ -24,13 +33,22 @@ class AppShell extends StatefulWidget {
 }
 
 class _AppShellState extends State<AppShell> {
+  static const List<int> _mobileScreenIndexes = [0, 3, 4, 5, 13];
+
   int _selectedIndex = 0;
 
   final List<Widget> _screens = [
     const DashboardScreen(),
+    const NotificationsScreen(),
+    const SearchScreen(),
     const ProjectsScreen(),
     const BugsListScreen(),
     const CrmDashboardScreen(),
+    const EmailSenderScreen(),
+    const BlueprintsScreen(),
+    const IcoAtlasScreen(),
+    const H4ckArsenalScreen(),
+    const VideoDashboardScreen(),
     const SeoAiScreen(),
     const AnalyticsScreen(),
     const AIAssistantScreen(),
@@ -40,9 +58,16 @@ class _AppShellState extends State<AppShell> {
 
   final List<String> _titles = [
     'Prehľad',
+    'Notifikácie',
+    'Vyhľadávanie',
     'Projekty',
     'Zoznam chýb',
     'CRM',
+    'Email Sender',
+    'Blueprints',
+    'IČO Atlas',
+    'H4CK Arsenal',
+    'Video Dashboard',
     'SEO AI',
     'Analytika',
     'AI Asistent',
@@ -52,10 +77,17 @@ class _AppShellState extends State<AppShell> {
 
   final List<IconData> _icons = [
     LucideIcons.layoutDashboard,
+    LucideIcons.bell,
+    LucideIcons.search,
     LucideIcons.folderKanban,
     LucideIcons.bug,
     LucideIcons.users,
-    LucideIcons.search,
+    LucideIcons.mail,
+    LucideIcons.layoutTemplate,
+    LucideIcons.badgeInfo,
+    LucideIcons.terminal,
+    LucideIcons.video,
+    LucideIcons.searchCode,
     LucideIcons.barChart2,
     LucideIcons.bot,
     LucideIcons.settings,
@@ -67,11 +99,12 @@ class _AppShellState extends State<AppShell> {
     final authProvider = Provider.of<AuthProvider>(context);
     final userProfile = authProvider.profile;
 
-    return Scaffold(
-      body: Responsive(
+    return PremiumBackground(
+      child: Responsive(
         mobile: Scaffold(
+          backgroundColor: Colors.transparent,
           appBar: AppBar(
-            backgroundColor: Colors.black.withOpacity(0.35),
+            backgroundColor: Colors.black.withValues(alpha: 0.35),
             elevation: 0,
             title: Text(
               _titles[_selectedIndex],
@@ -87,28 +120,27 @@ class _AppShellState extends State<AppShell> {
           drawer: _buildDrawer(authProvider),
           body: _screens[_selectedIndex],
           bottomNavigationBar: BottomNavigationBar(
-            currentIndex: _selectedIndex == 6
-                ? 4
-                : (_selectedIndex > 3 ? 0 : _selectedIndex),
+            currentIndex: _mobileScreenIndexes.contains(_selectedIndex)
+                ? _mobileScreenIndexes.indexOf(_selectedIndex)
+                : 0,
             onTap: (index) {
               setState(() {
-                if (index == 4) {
-                  _selectedIndex = 6; // AI Asistent is at index 6 of _screens
-                } else {
-                  _selectedIndex = index;
-                }
+                _selectedIndex = _mobileScreenIndexes[index];
               });
             },
-            backgroundColor: Colors.black.withOpacity(0.5),
+            backgroundColor: Colors.black.withValues(alpha: 0.5),
             selectedItemColor: AppTheme.primary,
             unselectedItemColor: AppTheme.textSecondary,
             type: BottomNavigationBarType.fixed,
             items: [
               BottomNavigationBarItem(icon: Icon(_icons[0]), label: 'Prehľad'),
-              BottomNavigationBarItem(icon: Icon(_icons[1]), label: 'Projekty'),
-              BottomNavigationBarItem(icon: Icon(_icons[2]), label: 'Chyby'),
-              BottomNavigationBarItem(icon: Icon(_icons[3]), label: 'CRM'),
-              BottomNavigationBarItem(icon: Icon(_icons[5]), label: 'AI'),
+              BottomNavigationBarItem(icon: Icon(_icons[3]), label: 'Projekty'),
+              BottomNavigationBarItem(icon: Icon(_icons[4]), label: 'Chyby'),
+              BottomNavigationBarItem(icon: Icon(_icons[5]), label: 'CRM'),
+              const BottomNavigationBarItem(
+                icon: Icon(LucideIcons.bot),
+                label: 'AI',
+              ),
             ],
           ),
         ),
@@ -189,16 +221,20 @@ class _AppShellState extends State<AppShell> {
                                     size: 18,
                                   ),
                                   const SizedBox(width: 12),
-                                  Text(
-                                    _titles[index],
-                                    style: TextStyle(
-                                      color: isSelected
-                                          ? AppTheme.textPrimary
-                                          : AppTheme.textSecondary,
-                                      fontWeight: isSelected
-                                          ? FontWeight.w600
-                                          : FontWeight.normal,
-                                      fontSize: 13,
+                                  Expanded(
+                                    child: Text(
+                                      _titles[index],
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        color: isSelected
+                                            ? AppTheme.textPrimary
+                                            : AppTheme.textSecondary,
+                                        fontWeight: isSelected
+                                            ? FontWeight.w600
+                                            : FontWeight.normal,
+                                        fontSize: 13,
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -216,7 +252,9 @@ class _AppShellState extends State<AppShell> {
                     child: Row(
                       children: [
                         CircleAvatar(
-                          backgroundColor: AppTheme.primary.withOpacity(0.2),
+                          backgroundColor: AppTheme.primary.withValues(
+                            alpha: 0.2,
+                          ),
                           radius: 18,
                           child: Text(
                             (userProfile?.fullName ?? 'U')
@@ -243,7 +281,7 @@ class _AppShellState extends State<AppShell> {
                               ),
                               Text(
                                 userProfile?.jobTitle ?? 'Vývojár',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 11,
                                   color: AppTheme.textSecondary,
                                 ),
@@ -253,7 +291,22 @@ class _AppShellState extends State<AppShell> {
                           ),
                         ),
                         IconButton(
-                          icon: const Icon(
+                          icon: Icon(
+                            Theme.of(context).brightness == Brightness.light
+                                ? LucideIcons.moon
+                                : LucideIcons.sun,
+                            size: 16,
+                            color: AppTheme.textSecondary,
+                          ),
+                          onPressed: () {
+                            Provider.of<ThemeProvider>(
+                              context,
+                              listen: false,
+                            ).toggleTheme();
+                          },
+                        ),
+                        IconButton(
+                          icon: Icon(
                             LucideIcons.logOut,
                             size: 16,
                             color: AppTheme.textSecondary,
@@ -269,7 +322,7 @@ class _AppShellState extends State<AppShell> {
             // Main content
             Expanded(
               child: Scaffold(
-                backgroundColor: AppTheme.background,
+                backgroundColor: Colors.transparent,
                 body: _screens[_selectedIndex],
               ),
             ),

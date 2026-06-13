@@ -47,6 +47,18 @@ dependencies:
   isar_flutter_libs: ^3.1.0+1
   path_provider: ^2.1.5
   uuid: ^4.3.3
+  # Local notifications
+  flutter_local_notifications: ^17.0.0
+  # CSV export
+  csv: ^6.0.0
+  # File sharing
+  share_plus: ^10.0.0
+  # WebView for video frames
+  webview_flutter: ^4.4.2
+  # Connectivity for offline detection
+  connectivity_plus: ^6.0.0
+  # URL launcher for video dashboard
+  url_launcher: ^6.3.0
 
 dev_dependencies:
   flutter_test:

@@ -1,8 +1,10 @@
+// ignore_for_file: avoid_print
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:isar/isar.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'supabase_service.dart';
 import 'models.dart';
 import 'isar_models.dart';
@@ -32,7 +34,11 @@ class DataProvider extends ChangeNotifier {
   }
 
   Future<void> _init() async {
+    // Initialize connectivity
+    _initConnectivity();
+    
     if (const bool.fromEnvironment('INTEGRATION_TEST', defaultValue: false)) {
+      _isOnline = true;
       _projects = [
         Project(
           id: 'proj_1',
@@ -99,6 +105,24 @@ class DataProvider extends ChangeNotifier {
     // 4. Start background timer to process offline sync queue every 10 seconds
     _syncTimer = Timer.periodic(const Duration(seconds: 10), (_) {
       processOfflineQueue();
+    });
+  }
+
+  void _initConnectivity() {
+    Connectivity().onConnectivityChanged.listen((List<ConnectivityResult> results) {
+      final hasConnection = results.any((result) => result != ConnectivityResult.none);
+      if (hasConnection != _isOnline) {
+        _isOnline = hasConnection;
+        if (_isOnline) {
+          // Connection restored, process queue immediately
+          _lastSyncTime = DateTime.now();
+          processOfflineQueue();
+        } else {
+          // Went offline
+          _syncError = 'No internet connection';
+        }
+        notifyListeners();
+      }
     });
   }
 
@@ -190,6 +214,29 @@ class DataProvider extends ChangeNotifier {
     }
     return _bugs.where((bug) => bug.projectId == _selectedProjectId).toList();
   }
+
+  /// Get sync status information
+  Map<String, dynamic> get syncStatus {
+    return {
+      'isOnline': _isOnline,
+      'lastSyncTime': _lastSyncTime,
+      'offlineQueueCount': _offlineQueueCount,
+      'isSyncing': _isSyncing,
+      'syncError': _syncError,
+    };
+  }
+
+  bool get isOnline => _isOnline;
+  bool get isSyncing => _isSyncing;
+  String? get lastSyncError => _syncError;
+  DateTime? get lastSyncTime => _lastSyncTime;
+  int get offlineQueueCount => _offlineQueueCount;
+
+  bool _isOnline = true;
+  bool _isSyncing = false;
+  String? _syncError;
+  DateTime? _lastSyncTime;
+  int _offlineQueueCount = 0;
 
   Future<bool> createBug({
     required String title,
@@ -369,8 +416,19 @@ class DataProvider extends ChangeNotifier {
   Future<void> processOfflineQueue() async {
     try {
       final queue = await _isarService.getOfflineQueue();
-      if (queue.isEmpty) return;
+      _offlineQueueCount = queue.length;
+      
+      if (queue.isEmpty) {
+        _isSyncing = false;
+        _syncError = null;
+        notifyListeners();
+        return;
+      }
 
+      _isSyncing = true;
+      _syncError = null;
+      notifyListeners();
+      
       print('Processing offline queue. Items to sync: ${queue.length}');
 
       if (const bool.fromEnvironment('INTEGRATION_TEST', defaultValue: false)) {
@@ -543,9 +601,16 @@ class DataProvider extends ChangeNotifier {
         }
       }
 
+      _lastSyncTime = DateTime.now();
+      _isSyncing = false;
+      _offlineQueueCount = 0;
+      _syncError = null;
       notifyListeners();
     } catch (e) {
       print('Error processing offline queue: $e');
+      _isSyncing = false;
+      _syncError = e.toString();
+      notifyListeners();
     }
   }
 

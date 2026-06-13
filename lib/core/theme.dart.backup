@@ -1,0 +1,155 @@
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+class AppTheme {
+  static TextStyle _getTextStyle(
+    TextStyle Function({
+      TextStyle? textStyle,
+      Color? color,
+      double? fontSize,
+      FontWeight? fontWeight,
+      FontStyle? fontStyle,
+    }) googleFont, {
+    Color? color,
+    double? fontSize,
+    FontWeight? fontWeight,
+  }) {
+    if (const bool.fromEnvironment('INTEGRATION_TEST', defaultValue: false)) {
+      return TextStyle(
+        color: color,
+        fontSize: fontSize,
+        fontWeight: fontWeight,
+      );
+    }
+    return googleFont(
+      color: color,
+      fontSize: fontSize,
+      fontWeight: fontWeight,
+    );
+  }
+  // Theme colors — dark palette matching wallpaper.html
+  static const Color background = Colors.transparent; // wallpaper shows through
+  static const Color cardBg = Color(0x0CFFFFFF); // white transparency on dark
+  static const Color border = Color(0x1FFFFFFF); // white border on dark
+  static const Color textPrimary = Color(0xF5FFFFFF); // near-white
+  static const Color textSecondary = Color(0xADFFFFFF); // muted white
+  static const Color primary = Color(0xFF00BCD4); // teal from wallpaper
+  static const Color success = Color(0xFF34A853); // Google green
+  static const Color warning = Color(0xFFFBBC04); // Google yellow
+  static const Color error = Color(0xFFEA4335); // Google red
+  static const Color info = Color(0xFF4285F4); // Google blue
+
+  // Status colors matching React project
+  static const Map<String, Color> statusColors = {
+    'new': Color(0xFF3B82F6),        // Blue
+    'assigned': Color(0xFF6366F1),   // Indigo/Primary
+    'in_progress': Color(0xFFF59E0B),// Warning/Amber
+    'testing': Color(0xFF9333EA),    // Purple
+    'resolved': Color(0xFF10B981),   // Success/Green
+    'closed': Color(0xFF6B7280),     // Muted Gray
+  };
+
+  static const Map<String, String> statusLabels = {
+    'new': 'Nová',
+    'assigned': 'Priradená',
+    'in_progress': 'V riešení',
+    'testing': 'Testovanie',
+    'resolved': 'Vyriešená',
+    'closed': 'Uzatvorená',
+  };
+
+  // Severity colors matching React project
+  static const Map<String, Color> severityColors = {
+    'critical': Color(0xFFEF4444),   // Red
+    'high': Color(0xFFF97316),       // Orange
+    'medium': Color(0xFFEAB308),     // Yellow
+    'low': Color(0xFF3B82F6),        // Blue
+  };
+
+  static const Map<String, String> severityLabels = {
+    'critical': 'Kritická',
+    'high': 'Vysoká',
+    'medium': 'Stredná',
+    'low': 'Nízka',
+  };
+
+  // Glassmorphic Decoration — dark style matching wallpaper
+  static BoxDecoration glassDecoration({
+    double borderRadius = 12.0,
+    Color bgColor = const Color(0x0DFFFFFF),
+    Color borderColor = const Color(0x1FFFFFFF),
+  }) {
+    return BoxDecoration(
+      color: bgColor,
+      borderRadius: BorderRadius.circular(borderRadius),
+      border: Border.all(color: borderColor, width: 1.0),
+    );
+  }
+
+  // Active / Selected Glassmorphic card
+  static BoxDecoration activeGlassDecoration({double borderRadius = 12.0}) {
+    return BoxDecoration(
+      color: const Color(0x1AFFFFFF),
+      borderRadius: BorderRadius.circular(borderRadius),
+      border: Border.all(color: const Color(0x33FFFFFF), width: 1.2),
+    );
+  }
+
+  // Dark ThemeData — matching wallpaper.html palette
+  static ThemeData get darkTheme {
+    return ThemeData(
+      brightness: Brightness.dark,
+      scaffoldBackgroundColor: Colors.transparent,
+      colorScheme: const ColorScheme.dark(
+        primary: primary,
+        secondary: success,
+        surface: cardBg,
+        error: error,
+      ),
+      textTheme: TextTheme(
+        headlineLarge: _getTextStyle(
+          GoogleFonts.outfit,
+          color: textPrimary,
+          fontSize: 28,
+          fontWeight: FontWeight.bold,
+        ),
+        headlineMedium: _getTextStyle(
+          GoogleFonts.outfit,
+          color: textPrimary,
+          fontSize: 22,
+          fontWeight: FontWeight.w600,
+        ),
+        titleMedium: _getTextStyle(
+          GoogleFonts.outfit,
+          color: textPrimary,
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+        ),
+        bodyLarge: _getTextStyle(
+          GoogleFonts.inter,
+          color: textPrimary,
+          fontSize: 14,
+        ),
+        bodyMedium: _getTextStyle(
+          GoogleFonts.inter,
+          color: textSecondary,
+          fontSize: 13,
+        ),
+        labelLarge: _getTextStyle(
+          GoogleFonts.inter,
+          color: textPrimary,
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      dividerColor: border,
+      cardTheme: CardThemeData(
+        color: cardBg,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: const BorderSide(color: border, width: 1),
+        ),
+      ),
+    );
+  }
+}

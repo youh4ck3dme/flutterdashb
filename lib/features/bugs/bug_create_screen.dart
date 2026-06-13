@@ -1,3 +1,4 @@
+// ignore_for_file: use_build_context_synchronously
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -6,7 +7,9 @@ import '../../core/auth_provider.dart';
 import '../../core/theme.dart';
 
 class BugCreateScreen extends StatefulWidget {
-  const BugCreateScreen({super.key});
+  final Map<String, String>? prefilledData;
+
+  const BugCreateScreen({super.key, this.prefilledData});
 
   @override
   State<BugCreateScreen> createState() => _BugCreateScreenState();
@@ -24,6 +27,36 @@ class _BugCreateScreenState extends State<BugCreateScreen> {
   String _severity = 'medium';
   String? _selectedProjectId;
   bool _submitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Prefill form fields if data is provided
+    if (widget.prefilledData != null) {
+      final data = widget.prefilledData!;
+      if (data.containsKey('title')) {
+        _titleController.text = data['title']!;
+      }
+      if (data.containsKey('description')) {
+        _descController.text = data['description']!;
+      }
+      if (data.containsKey('stepsToReproduce')) {
+        _stepsController.text = data['stepsToReproduce']!;
+      }
+      if (data.containsKey('expectedBehavior')) {
+        _expectedController.text = data['expectedBehavior']!;
+      }
+      if (data.containsKey('actualBehavior')) {
+        _actualController.text = data['actualBehavior']!;
+      }
+      if (data.containsKey('environment')) {
+        _envController.text = data['environment']!;
+      }
+      if (data.containsKey('severity') && AppTheme.severityLabels.containsKey(data['severity'])) {
+        _severity = data['severity']!;
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -107,7 +140,7 @@ class _BugCreateScreenState extends State<BugCreateScreen> {
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
               const SizedBox(height: 4),
-              const Text(
+              Text(
                 'Vyplňte formulár pre nahlásenie nového problému v systéme.',
                 style: TextStyle(color: AppTheme.textSecondary, fontSize: 12),
               ),
@@ -124,7 +157,7 @@ class _BugCreateScreenState extends State<BugCreateScreen> {
                     _buildLabel('Názov chyby *'),
                     TextFormField(
                       controller: _titleController,
-                      style: const TextStyle(fontSize: 13, color: AppTheme.textPrimary),
+                      style: TextStyle(fontSize: 13, color: AppTheme.textPrimary),
                       decoration: _buildInputDecoration('Stručný popis problému...'),
                       validator: (v) => (v == null || v.trim().isEmpty) ? 'Názov je povinný' : null,
                     ),
@@ -135,7 +168,7 @@ class _BugCreateScreenState extends State<BugCreateScreen> {
                     TextFormField(
                       controller: _descController,
                       maxLines: 4,
-                      style: const TextStyle(fontSize: 13, color: AppTheme.textPrimary),
+                      style: TextStyle(fontSize: 13, color: AppTheme.textPrimary),
                       decoration: _buildInputDecoration('Detailný popis chyby, čo sa deje...'),
                       validator: (v) => (v == null || v.trim().isEmpty) ? 'Popis je povinný' : null,
                     ),
@@ -151,8 +184,8 @@ class _BugCreateScreenState extends State<BugCreateScreen> {
                             children: [
                               _buildLabel('Projekt'),
                               DropdownButtonFormField<String>(
-                                value: _selectedProjectId,
-                                style: const TextStyle(fontSize: 13, color: AppTheme.textPrimary),
+                                initialValue: _selectedProjectId,
+                                style: TextStyle(fontSize: 13, color: AppTheme.textPrimary),
                                 dropdownColor: const Color(0xFF1E1E22),
                                 decoration: _buildInputDecoration('Vybrať projekt'),
                                 items: [
@@ -177,8 +210,8 @@ class _BugCreateScreenState extends State<BugCreateScreen> {
                             children: [
                               _buildLabel('Závažnosť *'),
                               DropdownButtonFormField<String>(
-                                value: _severity,
-                                style: const TextStyle(fontSize: 13, color: AppTheme.textPrimary),
+                                initialValue: _severity,
+                                style: TextStyle(fontSize: 13, color: AppTheme.textPrimary),
                                 dropdownColor: const Color(0xFF1E1E22),
                                 decoration: _buildInputDecoration('Závažnosť'),
                                 items: AppTheme.severityLabels.entries.map((e) {
@@ -200,7 +233,7 @@ class _BugCreateScreenState extends State<BugCreateScreen> {
               const SizedBox(height: 20),
 
               // Optional technical fields title
-              const Padding(
+              Padding(
                 padding: EdgeInsets.symmetric(vertical: 8.0),
                 child: Text(
                   'Technické detaily (Voliteľné)',
@@ -220,7 +253,7 @@ class _BugCreateScreenState extends State<BugCreateScreen> {
                     TextFormField(
                       controller: _stepsController,
                       maxLines: 3,
-                      style: const TextStyle(fontSize: 13, color: AppTheme.textPrimary),
+                      style: TextStyle(fontSize: 13, color: AppTheme.textPrimary),
                       decoration: _buildInputDecoration('1. Prejdite na...\n2. Kliknite na...'),
                     ),
                     const SizedBox(height: 16),
@@ -236,7 +269,7 @@ class _BugCreateScreenState extends State<BugCreateScreen> {
                               TextFormField(
                                 controller: _expectedController,
                                 maxLines: 2,
-                                style: const TextStyle(fontSize: 13, color: AppTheme.textPrimary),
+                                style: TextStyle(fontSize: 13, color: AppTheme.textPrimary),
                                 decoration: _buildInputDecoration('Čo sa malo stať...'),
                               ),
                             ],
@@ -251,7 +284,7 @@ class _BugCreateScreenState extends State<BugCreateScreen> {
                               TextFormField(
                                 controller: _actualController,
                                 maxLines: 2,
-                                style: const TextStyle(fontSize: 13, color: AppTheme.textPrimary),
+                                style: TextStyle(fontSize: 13, color: AppTheme.textPrimary),
                                 decoration: _buildInputDecoration('Čo sa naozaj stalo...'),
                               ),
                             ],
@@ -265,7 +298,7 @@ class _BugCreateScreenState extends State<BugCreateScreen> {
                     _buildLabel('Prostredie / Zariadenie'),
                     TextFormField(
                       controller: _envController,
-                      style: const TextStyle(fontSize: 13, color: AppTheme.textPrimary),
+                      style: TextStyle(fontSize: 13, color: AppTheme.textPrimary),
                       decoration: _buildInputDecoration('napr. Chrome v120, iOS 17.2, staging...'),
                     ),
                   ],
@@ -280,7 +313,7 @@ class _BugCreateScreenState extends State<BugCreateScreen> {
                 children: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text('Zrušiť', style: TextStyle(color: AppTheme.textSecondary)),
+                    child: Text('Zrušiť', style: TextStyle(color: AppTheme.textSecondary)),
                   ),
                   const SizedBox(width: 16),
                   ElevatedButton(
@@ -310,7 +343,7 @@ class _BugCreateScreenState extends State<BugCreateScreen> {
       padding: const EdgeInsets.only(bottom: 6.0),
       child: Text(
         text,
-        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.textSecondary),
+        style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.textSecondary),
       ),
     );
   }

@@ -69,7 +69,7 @@ class _CrmClientDialogState extends State<CrmClientDialog> {
         decoration: AppTheme.glassDecoration(
           borderRadius: 20,
           bgColor: const Color(0xFF15151A),
-          borderColor: Colors.white.withOpacity(0.15),
+          borderColor: Colors.white.withValues(alpha: 0.15),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -83,14 +83,14 @@ class _CrmClientDialogState extends State<CrmClientDialog> {
                 children: [
                   Text(
                     isEdit ? 'Upraviť klienta' : 'Pridať nového klienta',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: AppTheme.textPrimary,
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.close,
                       color: AppTheme.textSecondary,
                     ),
@@ -100,7 +100,7 @@ class _CrmClientDialogState extends State<CrmClientDialog> {
                 ],
               ),
             ),
-            const Divider(height: 1, color: AppTheme.border),
+            Divider(height: 1, color: AppTheme.border),
 
             // Scrollable Form
             Expanded(
@@ -200,7 +200,7 @@ class _CrmClientDialogState extends State<CrmClientDialog> {
                       const SizedBox(height: 16),
 
                       // Status Selector
-                      const Text(
+                      Text(
                         'Stav klienta *',
                         style: TextStyle(
                           fontSize: 13,
@@ -212,7 +212,7 @@ class _CrmClientDialogState extends State<CrmClientDialog> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.05),
+                          color: Colors.white.withValues(alpha: 0.05),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(color: AppTheme.border),
                         ),
@@ -221,21 +221,22 @@ class _CrmClientDialogState extends State<CrmClientDialog> {
                             value: _status,
                             dropdownColor: const Color(0xFF1E1E24),
                             isExpanded: true,
-                            icon: const Icon(
+                            icon: Icon(
                               Icons.arrow_drop_down,
                               color: AppTheme.textSecondary,
                             ),
                             items: _statusOptions.map((status) {
                               String display = status;
-                              if (status == 'lead')
+                              if (status == 'lead') {
                                 display = 'Lead (Potenciálny)';
+                              }
                               if (status == 'active') display = 'Aktívny';
                               if (status == 'inactive') display = 'Neaktívny';
                               return DropdownMenuItem(
                                 value: status,
                                 child: Text(
                                   display,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     color: AppTheme.textPrimary,
                                   ),
                                 ),
@@ -265,7 +266,7 @@ class _CrmClientDialogState extends State<CrmClientDialog> {
                 ),
               ),
             ),
-            const Divider(height: 1, color: AppTheme.border),
+            Divider(height: 1, color: AppTheme.border),
 
             // Actions Footer
             Padding(
@@ -318,7 +319,7 @@ class _CrmClientDialogState extends State<CrmClientDialog> {
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w500,
             color: AppTheme.textSecondary,
@@ -330,23 +331,23 @@ class _CrmClientDialogState extends State<CrmClientDialog> {
           validator: validator,
           keyboardType: keyboardType,
           maxLines: maxLines,
-          style: const TextStyle(color: AppTheme.textPrimary, fontSize: 14),
+          style: TextStyle(color: AppTheme.textPrimary, fontSize: 14),
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: const TextStyle(color: Colors.white24, fontSize: 14),
             filled: true,
-            fillColor: Colors.white.withOpacity(0.05),
+            fillColor: Colors.white.withValues(alpha: 0.05),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
               vertical: 12,
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: AppTheme.border),
+              borderSide: BorderSide(color: AppTheme.border),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: AppTheme.border),
+              borderSide: BorderSide(color: AppTheme.border),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),

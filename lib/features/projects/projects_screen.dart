@@ -33,7 +33,7 @@ class ProjectsScreen extends StatelessWidget {
               style: Theme.of(context).textTheme.headlineMedium,
             ),
             const SizedBox(height: 4),
-            const Text(
+            Text(
               'Zoznam všetkých monitorovaných softvérových projektov a ich aktuálny stav.',
               style: TextStyle(color: AppTheme.textSecondary, fontSize: 12),
             ),
@@ -43,8 +43,8 @@ class ProjectsScreen extends StatelessWidget {
               // WordPress Integration banner
               Container(
                 decoration: AppTheme.glassDecoration(
-                  bgColor: AppTheme.primary.withOpacity(0.05),
-                  borderColor: AppTheme.primary.withOpacity(0.2),
+                  bgColor: AppTheme.primary.withValues(alpha: 0.05),
+                  borderColor: AppTheme.primary.withValues(alpha: 0.2),
                 ),
                 padding: const EdgeInsets.all(16),
                 child: Row(
@@ -55,13 +55,13 @@ class ProjectsScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             'WordPress Integrácia aktívna',
                             style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
                           ),
                           Text(
                             'Verejný portál: ${AppConfig.wordpressPublicSiteUrl}',
-                            style: const TextStyle(fontSize: 10, color: AppTheme.textSecondary),
+                            style: TextStyle(fontSize: 10, color: AppTheme.textSecondary),
                           ),
                         ],
                       ),
@@ -76,7 +76,7 @@ class ProjectsScreen extends StatelessWidget {
                 ? Container(
                     padding: const EdgeInsets.all(32),
                     decoration: AppTheme.glassDecoration(),
-                    child: const Center(
+                    child: Center(
                       child: Text(
                         'Neboli nájdené žiadne projekty.',
                         style: TextStyle(color: AppTheme.textSecondary, fontSize: 12),
@@ -113,14 +113,14 @@ class ProjectsScreen extends StatelessWidget {
                                   children: [
                                     CircleAvatar(
                                       radius: 16,
-                                      backgroundColor: AppTheme.primary.withOpacity(0.1),
+                                      backgroundColor: AppTheme.primary.withValues(alpha: 0.1),
                                       child: const Icon(LucideIcons.folder, color: AppTheme.primary, size: 16),
                                     ),
                                     const SizedBox(width: 12),
                                     Expanded(
                                       child: Text(
                                         project.name,
-                                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
+                                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
@@ -130,12 +130,12 @@ class ProjectsScreen extends StatelessWidget {
                                 Expanded(
                                   child: Text(
                                     project.description ?? 'Bez dodatočného popisu.',
-                                    style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary, height: 1.4),
+                                    style: TextStyle(fontSize: 11, color: AppTheme.textSecondary, height: 1.4),
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
-                                const Divider(color: Color(0x10FFFFFF), height: 20),
+                                Divider(color: Color(0x10FFFFFF), height: 20),
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
@@ -157,15 +157,16 @@ class ProjectsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStatItem(String label, String value, {Color color = AppTheme.textSecondary}) {
+  Widget _buildStatItem(String label, String value, {Color? color}) {
+    final displayColor = color ?? AppTheme.textSecondary;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontSize: 9, color: AppTheme.textSecondary)),
+        Text(label, style: TextStyle(fontSize: 9, color: AppTheme.textSecondary)),
         const SizedBox(height: 2),
         Text(
           value,
-          style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: color),
+          style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: displayColor),
         ),
       ],
     );

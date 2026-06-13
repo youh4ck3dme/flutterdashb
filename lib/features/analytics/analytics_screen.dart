@@ -40,7 +40,7 @@ class AnalyticsScreen extends StatelessWidget {
               style: Theme.of(context).textTheme.headlineMedium,
             ),
             const SizedBox(height: 4),
-            const Text(
+            Text(
               'Podrobná analýza vývoja nahlásených chýb, priorít a stavov.',
               style: TextStyle(color: AppTheme.textSecondary, fontSize: 12),
             ),
@@ -107,7 +107,7 @@ class AnalyticsScreen extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 18,
-            backgroundColor: color.withOpacity(0.08),
+            backgroundColor: color.withValues(alpha: 0.08),
             child: Icon(icon, color: color, size: 18),
           ),
           const SizedBox(width: 12),
@@ -116,7 +116,7 @@ class AnalyticsScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(title, style: const TextStyle(fontSize: 10, color: AppTheme.textSecondary)),
+                Text(title, style: TextStyle(fontSize: 10, color: AppTheme.textSecondary)),
                 const SizedBox(height: 4),
                 Text(val, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: color)),
               ],
@@ -161,7 +161,7 @@ class AnalyticsScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text('Workflow Distribúcia', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
-          const Text('Počet chýb v jednotlivých fázach riešenia.', style: TextStyle(fontSize: 10, color: AppTheme.textSecondary)),
+          Text('Počet chýb v jednotlivých fázach riešenia.', style: TextStyle(fontSize: 10, color: AppTheme.textSecondary)),
           const SizedBox(height: 24),
           Expanded(
             child: BarChart(
@@ -185,7 +185,7 @@ class AnalyticsScreen extends StatelessWidget {
                           padding: const EdgeInsets.only(top: 6.0),
                           child: Text(
                             keys[val.toInt()],
-                            style: const TextStyle(fontSize: 9, color: AppTheme.textSecondary),
+                            style: TextStyle(fontSize: 9, color: AppTheme.textSecondary),
                           ),
                         );
                       },
@@ -231,11 +231,11 @@ class AnalyticsScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text('Incidenty podľa Závažnosti', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
-          const Text('Rozdelenie nahlásených chýb podľa priority dopadu.', style: TextStyle(fontSize: 10, color: AppTheme.textSecondary)),
+          Text('Rozdelenie nahlásených chýb podľa priority dopadu.', style: TextStyle(fontSize: 10, color: AppTheme.textSecondary)),
           const SizedBox(height: 24),
           Expanded(
             child: sections.isEmpty
-                ? const Center(child: Text('Žiadne dáta na zobrazenie', style: TextStyle(fontSize: 11, color: AppTheme.textSecondary)))
+                ? Center(child: Text('Žiadne dáta na zobrazenie', style: TextStyle(fontSize: 11, color: AppTheme.textSecondary)))
                 : PieChart(
                     PieChartData(
                       sectionsSpace: 3,
@@ -276,8 +276,8 @@ class AnalyticsScreen extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(proj.name, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppTheme.textPrimary)),
-                        Text('Aktívne: $open z $total', style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary)),
+                        Text(proj.name, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppTheme.textPrimary)),
+                        Text('Aktívne: $open z $total', style: TextStyle(fontSize: 11, color: AppTheme.textSecondary)),
                       ],
                     ),
                     const SizedBox(height: 6),

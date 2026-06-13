@@ -30,16 +30,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
 
     final filteredBugs = dataProvider.filteredBugs.where((bug) {
-      final matchesSearch = bug.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+      final matchesSearch =
+          bug.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
           bug.trackingId.toLowerCase().contains(_searchQuery.toLowerCase());
       return matchesSearch;
     }).toList();
 
     // Stats calculations
     final totalCount = filteredBugs.length;
-    final criticalCount = filteredBugs.where((b) => b.severity == 'critical').length;
-    final openCount = filteredBugs.where((b) => b.status != 'resolved' && b.status != 'closed').length;
-    final resolvedCount = filteredBugs.where((b) => b.status == 'resolved' || b.status == 'closed').length;
+    final criticalCount = filteredBugs
+        .where((b) => b.severity == 'critical')
+        .length;
+    final openCount = filteredBugs
+        .where((b) => b.status != 'resolved' && b.status != 'closed')
+        .length;
+    final resolvedCount = filteredBugs
+        .where((b) => b.status == 'resolved' || b.status == 'closed')
+        .length;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -52,45 +59,67 @@ class _DashboardScreenState extends State<DashboardScreen> {
               color: Color(0x0AFFFFFF),
               border: Border(bottom: BorderSide(color: Color(0x15FFFFFF))),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final isCompact = constraints.maxWidth < 360;
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      'Prehľad',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Prehľad',
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
                           ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Rýchly prehľad projektov a chýb',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: AppTheme.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    const SizedBox(height: 2),
-                    const Text(
-                      'Rýchly prehľad projektov a chýb',
-                      style: TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                    const SizedBox(width: 12),
+                    ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.primary,
+                        foregroundColor: Colors.white,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isCompact ? 12 : 16,
+                          vertical: 10,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      icon: const Icon(LucideIcons.plus, size: 14),
+                      label: Text(
+                        isCompact ? 'Chyba' : 'Nahlásiť chybu',
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const BugCreateScreen(),
+                          ),
+                        );
+                      },
                     ),
                   ],
-                ),
-                ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.primary,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  icon: const Icon(LucideIcons.plus, size: 14),
-                  label: const Text('Nahlásiť chybu', style: TextStyle(fontSize: 12)),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const BugCreateScreen()),
-                    );
-                  },
-                ),
-              ],
+                );
+              },
             ),
           ),
 
@@ -102,7 +131,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Stats row
-                  _buildStatsRow(totalCount, criticalCount, openCount, resolvedCount),
+                  _buildStatsRow(
+                    totalCount,
+                    criticalCount,
+                    openCount,
+                    resolvedCount,
+                  ),
                   const SizedBox(height: 24),
 
                   // Projects Selector
@@ -148,15 +182,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           padding: const EdgeInsets.symmetric(horizontal: 12),
                           child: Row(
                             children: [
-                              const Icon(LucideIcons.search, size: 16, color: AppTheme.textSecondary),
+                              Icon(
+                                LucideIcons.search,
+                                size: 16,
+                                color: AppTheme.textSecondary,
+                              ),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: TextField(
-                                  onChanged: (v) => setState(() => _searchQuery = v),
-                                  style: const TextStyle(fontSize: 12, color: AppTheme.textPrimary),
+                                  onChanged: (v) =>
+                                      setState(() => _searchQuery = v),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: AppTheme.textPrimary,
+                                  ),
                                   decoration: const InputDecoration(
                                     hintText: 'Hľadať chyby...',
-                                    hintStyle: TextStyle(color: Color(0x44FFFFFF), fontSize: 12),
+                                    hintStyle: TextStyle(
+                                      color: Color(0x44FFFFFF),
+                                      fontSize: 12,
+                                    ),
                                     border: InputBorder.none,
                                     isDense: true,
                                   ),
@@ -178,7 +223,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         child: Row(
                           children: [
                             _buildViewModeButton('table', LucideIcons.list),
-                            _buildViewModeButton('kanban', LucideIcons.layoutGrid),
+                            _buildViewModeButton(
+                              'kanban',
+                              LucideIcons.layoutGrid,
+                            ),
                           ],
                         ),
                       ),
@@ -224,7 +272,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget _buildStatsRow(int total, int critical, int open, int resolved) {
     final stats = [
-      {'label': 'Všetky chyby', 'value': '$total', 'color': AppTheme.textPrimary},
+      {
+        'label': 'Všetky chyby',
+        'value': '$total',
+        'color': AppTheme.textPrimary,
+      },
       {'label': 'Kritické', 'value': '$critical', 'color': AppTheme.error},
       {'label': 'Otvorené', 'value': '$open', 'color': AppTheme.warning},
       {'label': 'Vyriešené', 'value': '$resolved', 'color': AppTheme.success},
@@ -240,20 +292,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
             crossAxisCount: crossAxisCount,
             crossAxisSpacing: 12,
             mainAxisSpacing: 12,
-            childAspectRatio: constraints.maxWidth < 600 ? 2.5 : 1.7,
+            childAspectRatio: constraints.maxWidth < 600 ? 1.55 : 1.7,
           ),
           itemCount: stats.length,
           itemBuilder: (context, i) {
             return Container(
               decoration: AppTheme.glassDecoration(),
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
                     stats[i]['label'] as String,
-                    style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: AppTheme.textSecondary,
+                    ),
                   ),
                   const SizedBox(height: 6),
                   Text(
@@ -284,7 +339,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
         'name': 'Všetky projekty',
         'description': 'Celkový prehľad naprieč projektmi.',
         'total': bugs.length,
-        'open': bugs.where((b) => b.status != 'resolved' && b.status != 'closed').length,
+        'open': bugs
+            .where((b) => b.status != 'resolved' && b.status != 'closed')
+            .length,
         'critical': bugs.where((b) => b.severity == 'critical').length,
       },
       ...projects.map((p) {
@@ -294,7 +351,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
           'name': p.name,
           'description': p.description ?? 'Bez popisu.',
           'total': pBugs.length,
-          'open': pBugs.where((b) => b.status != 'resolved' && b.status != 'closed').length,
+          'open': pBugs
+              .where((b) => b.status != 'resolved' && b.status != 'closed')
+              .length,
           'critical': pBugs.where((b) => b.severity == 'critical').length,
         };
       }),
@@ -329,19 +388,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         Expanded(
                           child: Text(
                             p['name'] as String,
-                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
                             color: const Color(0x0EFFFFFF),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
                             '${p['total']}',
-                            style: const TextStyle(fontSize: 10, color: AppTheme.textSecondary),
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: AppTheme.textSecondary,
+                            ),
                           ),
                         ),
                       ],
@@ -349,7 +417,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     const SizedBox(height: 6),
                     Text(
                       p['description'] as String,
-                      style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: AppTheme.textSecondary,
+                      ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -360,7 +431,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         Expanded(
                           child: Text(
                             'Otvorené: ${p['open']}',
-                            style: const TextStyle(fontSize: 10, color: AppTheme.textSecondary),
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: AppTheme.textSecondary,
+                            ),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -370,8 +444,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             'Kritické: ${p['critical']}',
                             style: TextStyle(
                               fontSize: 10,
-                              color: (p['critical'] as int) > 0 ? AppTheme.error : AppTheme.textSecondary,
-                              fontWeight: (p['critical'] as int) > 0 ? FontWeight.bold : FontWeight.normal,
+                              color: (p['critical'] as int) > 0
+                                  ? AppTheme.error
+                                  : AppTheme.textSecondary,
+                              fontWeight: (p['critical'] as int) > 0
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
                             ),
                             overflow: TextOverflow.ellipsis,
                             textAlign: TextAlign.end,
@@ -409,7 +487,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               color: AppTheme.statusColors[statusKey] ?? Colors.grey,
               width: 14,
               borderRadius: BorderRadius.circular(4),
-            )
+            ),
           ],
         ),
       );
@@ -423,8 +501,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Chyby podľa stavu', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-          const Text('Rozdelenie podľa krokov workflow', style: TextStyle(fontSize: 10, color: AppTheme.textSecondary)),
+          const Text(
+            'Chyby podľa stavu',
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+          ),
+          Text(
+            'Rozdelenie podľa krokov workflow',
+            style: TextStyle(fontSize: 10, color: AppTheme.textSecondary),
+          ),
           const SizedBox(height: 16),
           Expanded(
             child: BarChart(
@@ -434,9 +518,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 gridData: const FlGridData(show: false),
                 borderData: FlBorderData(show: false),
                 titlesData: FlTitlesData(
-                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  topTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
+                  rightTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
+                  leftTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
                   bottomTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
@@ -449,7 +539,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           padding: const EdgeInsets.only(top: 6.0),
                           child: Text(
                             keys[val.toInt()],
-                            style: const TextStyle(fontSize: 9, color: AppTheme.textSecondary),
+                            style: TextStyle(
+                              fontSize: 9,
+                              color: AppTheme.textSecondary,
+                            ),
                           ),
                         );
                       },
@@ -482,7 +575,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
             value: val,
             title: '${val.toInt()}',
             radius: 40,
-            titleStyle: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white),
+            titleStyle: const TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
           ),
         );
       }
@@ -495,12 +592,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Rozdelenie podľa závažnosti', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-          const Text('Prehľad podľa úrovne závažnosti', style: TextStyle(fontSize: 10, color: AppTheme.textSecondary)),
+          const Text(
+            'Rozdelenie podľa závažnosti',
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+          ),
+          Text(
+            'Prehľad podľa úrovne závažnosti',
+            style: TextStyle(fontSize: 10, color: AppTheme.textSecondary),
+          ),
           const SizedBox(height: 16),
           Expanded(
             child: sections.isEmpty
-                ? const Center(child: Text('Žiadne dáta', style: TextStyle(fontSize: 11, color: AppTheme.textSecondary)))
+                ? Center(
+                    child: Text(
+                      'Žiadne dáta',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: AppTheme.textSecondary,
+                      ),
+                    ),
+                  )
                 : PieChart(
                     PieChartData(
                       sectionsSpace: 2,
@@ -520,7 +631,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         width: double.infinity,
         padding: const EdgeInsets.all(32),
         decoration: AppTheme.glassDecoration(),
-        child: const Center(
+        child: Center(
           child: Text(
             'Nenašli sa žiadne chyby',
             style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
@@ -539,7 +650,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
           return Card(
             margin: const EdgeInsets.only(bottom: 8),
             child: ListTile(
-              title: Text(bug.title, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+              title: Text(
+                bug.title,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               subtitle: Padding(
                 padding: const EdgeInsets.only(top: 6.0),
                 child: Row(
@@ -552,12 +669,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
               trailing: Text(
                 bug.trackingId,
-                style: const TextStyle(fontSize: 10, fontFamily: 'monospace', color: AppTheme.textSecondary),
+                style: TextStyle(
+                  fontSize: 10,
+                  fontFamily: 'monospace',
+                  color: AppTheme.textSecondary,
+                ),
               ),
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => BugDetailScreen(bugId: bug.id)),
+                  MaterialPageRoute(
+                    builder: (context) => BugDetailScreen(bugId: bug.id),
+                  ),
                 );
               },
             ),
@@ -568,14 +691,36 @@ class _DashboardScreenState extends State<DashboardScreen> {
         width: double.infinity,
         decoration: AppTheme.glassDecoration(),
         child: Theme(
-          data: Theme.of(context).copyWith(dividerColor: const Color(0x15FFFFFF)),
+          data: Theme.of(
+            context,
+          ).copyWith(dividerColor: Color(0x15FFFFFF)),
           child: DataTable(
             showCheckboxColumn: false,
-            columns: const [
-              DataColumn(label: Text('ID', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary))),
-              DataColumn(label: Text('Názov', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary))),
-              DataColumn(label: Text('Stav', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary))),
-              DataColumn(label: Text('Priorita', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary))),
+            columns: [
+              DataColumn(
+                label: Text(
+                  'ID',
+                  style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                ),
+              ),
+              DataColumn(
+                label: Text(
+                  'Názov',
+                  style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                ),
+              ),
+              DataColumn(
+                label: Text(
+                  'Stav',
+                  style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                ),
+              ),
+              DataColumn(
+                label: Text(
+                  'Priorita',
+                  style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                ),
+              ),
             ],
             rows: bugs.map((bug) {
               return DataRow(
@@ -583,13 +728,32 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   if (selected == true) {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => BugDetailScreen(bugId: bug.id)),
+                      MaterialPageRoute(
+                        builder: (context) => BugDetailScreen(bugId: bug.id),
+                      ),
                     );
                   }
                 },
                 cells: [
-                  DataCell(Text(bug.trackingId, style: const TextStyle(fontSize: 11, fontFamily: 'monospace', color: AppTheme.textSecondary))),
-                  DataCell(Text(bug.title, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500))),
+                  DataCell(
+                    Text(
+                      bug.trackingId,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontFamily: 'monospace',
+                        color: AppTheme.textSecondary,
+                      ),
+                    ),
+                  ),
+                  DataCell(
+                    Text(
+                      bug.title,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
                   DataCell(StatusBadge(status: bug.status)),
                   DataCell(SeverityBadge(severity: bug.severity)),
                 ],
@@ -602,7 +766,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildBugsKanbanView(List<Bug> bugs, DataProvider provider) {
-    final List<String> columns = ['new', 'assigned', 'in_progress', 'testing', 'resolved', 'closed'];
+    final List<String> columns = [
+      'new',
+      'assigned',
+      'in_progress',
+      'testing',
+      'resolved',
+      'closed',
+    ];
 
     return SizedBox(
       height: 400,
@@ -626,7 +797,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     StatusBadge(status: colStatus),
                     Text(
                       '${colBugs.length}',
-                      style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: AppTheme.textSecondary,
+                      ),
                     ),
                   ],
                 ),
@@ -642,10 +816,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                     padding: const EdgeInsets.all(8),
                     child: colBugs.isEmpty
-                        ? const Center(
+                        ? Center(
                             child: Text(
                               'Žiadne chyby',
-                              style: TextStyle(fontSize: 10, color: AppTheme.textSecondary),
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: AppTheme.textSecondary,
+                              ),
                             ),
                           )
                         : ListView.builder(
@@ -658,23 +835,34 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   onTap: () {
                                     Navigator.push(
                                       context,
-                                      MaterialPageRoute(builder: (context) => BugDetailScreen(bugId: bug.id)),
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            BugDetailScreen(bugId: bug.id),
+                                      ),
                                     );
                                   },
                                   borderRadius: BorderRadius.circular(12),
                                   child: Padding(
                                     padding: const EdgeInsets.all(12),
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           bug.trackingId,
-                                          style: const TextStyle(fontSize: 10, fontFamily: 'monospace', color: AppTheme.textSecondary),
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            fontFamily: 'monospace',
+                                            color: AppTheme.textSecondary,
+                                          ),
                                         ),
                                         const SizedBox(height: 4),
                                         Text(
                                           bug.title,
-                                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                           maxLines: 2,
                                           overflow: TextOverflow.ellipsis,
                                         ),

@@ -68,12 +68,12 @@ class _BugsListScreenState extends State<BugsListScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 12),
                         child: Row(
                           children: [
-                            const Icon(LucideIcons.search, size: 16, color: AppTheme.textSecondary),
+                            Icon(LucideIcons.search, size: 16, color: AppTheme.textSecondary),
                             const SizedBox(width: 8),
                             Expanded(
                               child: TextField(
                                 onChanged: (v) => setState(() => _searchQuery = v),
-                                style: const TextStyle(fontSize: 12, color: AppTheme.textPrimary),
+                                style: TextStyle(fontSize: 12, color: AppTheme.textPrimary),
                                 decoration: const InputDecoration(
                                   hintText: 'Vyhľadať chybu podľa názvu alebo ID...',
                                   hintStyle: TextStyle(color: Color(0x44FFFFFF), fontSize: 12),
@@ -115,7 +115,7 @@ class _BugsListScreenState extends State<BugsListScreen> {
                   child: Row(
                     children: [
                       // Status filters
-                      const Text('Stav: ', style: TextStyle(fontSize: 11, color: AppTheme.textSecondary, fontWeight: FontWeight.bold)),
+                      Text('Stav: ', style: TextStyle(fontSize: 11, color: AppTheme.textSecondary, fontWeight: FontWeight.bold)),
                       const SizedBox(width: 6),
                       _buildFilterChip('Všetky', 'all', _selectedStatus, (val) => setState(() => _selectedStatus = val)),
                       ...AppTheme.statusLabels.entries.map((e) {
@@ -130,7 +130,7 @@ class _BugsListScreenState extends State<BugsListScreen> {
                       const SizedBox(width: 16),
 
                       // Severity filters
-                      const Text('Priorita: ', style: TextStyle(fontSize: 11, color: AppTheme.textSecondary, fontWeight: FontWeight.bold)),
+                      Text('Priorita: ', style: TextStyle(fontSize: 11, color: AppTheme.textSecondary, fontWeight: FontWeight.bold)),
                       const SizedBox(width: 6),
                       _buildFilterChip('Všetky', 'all', _selectedSeverity, (val) => setState(() => _selectedSeverity = val)),
                       ...AppTheme.severityLabels.entries.map((e) {
@@ -153,9 +153,9 @@ class _BugsListScreenState extends State<BugsListScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(LucideIcons.smile, size: 40, color: AppTheme.textSecondary.withOpacity(0.5)),
+                        Icon(LucideIcons.smile, size: 40, color: AppTheme.textSecondary.withValues(alpha: 0.5)),
                         const SizedBox(height: 12),
-                        const Text(
+                        Text(
                           'Nenašli sa žiadne nahlásené chyby',
                           style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
                         ),
@@ -193,23 +193,23 @@ class _BugsListScreenState extends State<BugsListScreen> {
                                   children: [
                                     Text(
                                       bug.trackingId,
-                                      style: const TextStyle(fontSize: 10, fontFamily: 'monospace', color: AppTheme.textSecondary, fontWeight: FontWeight.bold),
+                                      style: TextStyle(fontSize: 10, fontFamily: 'monospace', color: AppTheme.textSecondary, fontWeight: FontWeight.bold),
                                     ),
                                     Text(
                                       pName,
-                                      style: const TextStyle(fontSize: 10, color: AppTheme.textSecondary),
+                                      style: TextStyle(fontSize: 10, color: AppTheme.textSecondary),
                                     ),
                                   ],
                                 ),
                                 const SizedBox(height: 6),
                                 Text(
                                   bug.title,
-                                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
+                                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
                                 ),
                                 const SizedBox(height: 6),
                                 Text(
                                   bug.description,
-                                  style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                                  style: TextStyle(fontSize: 11, color: AppTheme.textSecondary),
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -242,10 +242,10 @@ class _BugsListScreenState extends State<BugsListScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(
-          color: isSelected ? AppTheme.primary.withOpacity(0.2) : const Color(0x08FFFFFF),
+          color: isSelected ? AppTheme.primary.withValues(alpha: 0.2) : const Color(0x08FFFFFF),
           borderRadius: BorderRadius.circular(6),
           border: Border.all(
-            color: isSelected ? AppTheme.primary.withOpacity(0.5) : const Color(0x10FFFFFF),
+            color: isSelected ? AppTheme.primary.withValues(alpha: 0.5) : const Color(0x10FFFFFF),
             width: 1,
           ),
         ),

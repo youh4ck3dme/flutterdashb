@@ -55,7 +55,7 @@ class ChangelogScreen extends StatelessWidget {
               style: Theme.of(context).textTheme.headlineMedium,
             ),
             const SizedBox(height: 4),
-            const Text(
+            Text(
               'História verzií a prehľad zmien vykonaných v systéme.',
               style: TextStyle(color: AppTheme.textSecondary, fontSize: 12),
             ),
@@ -85,7 +85,7 @@ class ChangelogScreen extends StatelessWidget {
                               shape: BoxShape.circle,
                               boxShadow: [
                                 BoxShadow(
-                                  color: color.withOpacity(0.5),
+                                  color: color.withValues(alpha: 0.5),
                                   blurRadius: 6,
                                   spreadRadius: 2,
                                 ),
@@ -118,9 +118,9 @@ class ChangelogScreen extends StatelessWidget {
                                     Container(
                                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                       decoration: BoxDecoration(
-                                        color: color.withOpacity(0.12),
+                                        color: color.withValues(alpha: 0.12),
                                         borderRadius: BorderRadius.circular(4),
-                                        border: Border.all(color: color.withOpacity(0.3)),
+                                        border: Border.all(color: color.withValues(alpha: 0.3)),
                                       ),
                                       child: Text(
                                         log['version'] as String,
@@ -129,14 +129,14 @@ class ChangelogScreen extends StatelessWidget {
                                     ),
                                     Text(
                                       log['date'] as String,
-                                      style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                                      style: TextStyle(fontSize: 11, color: AppTheme.textSecondary),
                                     ),
                                   ],
                                 ),
                                 const SizedBox(height: 10),
                                 Text(
                                   log['title'] as String,
-                                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
+                                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
                                 ),
                                 const SizedBox(height: 12),
                                 ...changes.map((c) => Padding(
@@ -144,14 +144,14 @@ class ChangelogScreen extends StatelessWidget {
                                       child: Row(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          const Padding(
+                                          Padding(
                                             padding: EdgeInsets.only(top: 4.0, right: 8.0),
                                             child: Icon(LucideIcons.check, size: 10, color: AppTheme.textSecondary),
                                           ),
                                           Expanded(
                                             child: Text(
                                               c,
-                                              style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary, height: 1.4),
+                                              style: TextStyle(fontSize: 11, color: AppTheme.textSecondary, height: 1.4),
                                             ),
                                           ),
                                         ],

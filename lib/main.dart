@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import 'core/auth_provider.dart';
 import 'core/data_provider.dart';
 import 'core/theme.dart';
+import 'core/theme_provider.dart';
+import 'core/notification_service.dart';
 import 'features/auth/auth_screen.dart';
 import 'features/shell/app_shell.dart';
 import 'features/crm/providers/crm_provider.dart';
@@ -19,6 +21,8 @@ void main() async {
         ChangeNotifierProvider<AuthProvider>(create: (_) => AuthProvider()),
         ChangeNotifierProvider<DataProvider>(create: (_) => DataProvider()),
         ChangeNotifierProvider<CrmProvider>(create: (_) => CrmProvider()),
+        ChangeNotifierProvider<ThemeProvider>(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider<NotificationService>(create: (_) => NotificationService()),
       ],
       child: const MyApp(),
     ),
@@ -30,9 +34,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
     return MaterialApp(
       title: 'Centralny Dashboard',
-      theme: AppTheme.darkTheme,
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: themeProvider.themeMode,
       debugShowCheckedModeBanner: false,
       home: const AuthGate(),
     );
