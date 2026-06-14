@@ -1,11 +1,11 @@
 {
-    "name": "centralny_dashboard",
-    "short_name": "centralny_dashboard",
+    "name": "Central Dashboard",
+    "short_name": "Dashboard",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Central dashboard for project control, CRM, bug tracking, analytics, and embedded operations tools.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

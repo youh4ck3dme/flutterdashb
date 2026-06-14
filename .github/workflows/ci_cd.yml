@@ -43,8 +43,45 @@ jobs:
       - name: Run Tests
         run: flutter test --dart-define=INTEGRATION_TEST=true
 
+  desktop_integration_test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install Linux desktop dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev xvfb
+
+      - name: Enable Linux desktop
+        run: flutter config --enable-linux-desktop
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Download Isar Binary (Linux)
+        run: |
+          curl -L https://github.com/isar/isar/releases/download/3.1.0%2B1/libisar_linux_x64.so -o libisar.so
+
+      - name: Run desktop integration tests
+        run: xvfb-run -a flutter test integration_test/app_test.dart -d linux --dart-define=INTEGRATION_TEST=true
+
   deploy_to_vercel:
-    needs: analyze_and_test
+    needs: [analyze_and_test, desktop_integration_test]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     env:
@@ -132,3 +169,44 @@ jobs:
           fi
 
           vercel deploy build/web --prod --yes --token="$VERCEL_TOKEN" --scope "$VERCEL_ORG_ID"
+
+  live_release_gate:
+    needs: deploy_to_vercel
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    env:
+      LIVE_BASE_URL: https://flutterdashb-mocha.vercel.app
+      REQUIRE_BACKEND_CHECKS: true
+      VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+      VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+      VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
+      VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
+      VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
+      VITE_WORDPRESS_PUBLIC_SITE_URL: ${{ secrets.VITE_WORDPRESS_PUBLIC_SITE_URL }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install release gate dependencies
+        run: npm ci
+
+      - name: Install Chromium for browser checks
+        run: npx playwright install --with-deps chromium
+
+      - name: Run live browser/backend/visual release gate
+        run: npm run release:live-gate
+
+      - name: Upload live release gate artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-release-gate
+          path: artifacts/live-release-gate
+          if-no-files-found: ignore

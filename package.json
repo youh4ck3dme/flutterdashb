@@ -1,0 +1,10 @@
+{
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "release:live-gate": "node tool/live_release_gate.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.60.0"
+  }
+}
