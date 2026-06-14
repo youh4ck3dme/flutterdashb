@@ -34,9 +34,6 @@ class DataProvider extends ChangeNotifier {
   }
 
   Future<void> _init() async {
-    // Initialize connectivity
-    _initConnectivity();
-    
     if (const bool.fromEnvironment('INTEGRATION_TEST', defaultValue: false)) {
       _isOnline = true;
       _projects = [
@@ -63,7 +60,8 @@ class DataProvider extends ChangeNotifier {
           id: 'bug_1',
           trackingId: 'BUG-1001',
           title: 'Chyba pri prihlásení cez Google',
-          description: 'Pri pokuse o prihlásenie cez Google appka zamrzne na bielej obrazovke.',
+          description:
+              'Pri pokuse o prihlásenie cez Google appka zamrzne na bielej obrazovke.',
           projectId: 'proj_1',
           reporterId: 'test-user-uid',
           severity: 'critical',
@@ -76,7 +74,8 @@ class DataProvider extends ChangeNotifier {
           id: 'bug_2',
           trackingId: 'BUG-1002',
           title: 'Layout preteká na iPhone SE',
-          description: 'V spodnej časti obrazovky nastavení sa zobrazuje žlté pretečenie.',
+          description:
+              'V spodnej časti obrazovky nastavení sa zobrazuje žlté pretečenie.',
           projectId: 'proj_2',
           reporterId: 'test-user-uid',
           severity: 'medium',
@@ -90,15 +89,19 @@ class DataProvider extends ChangeNotifier {
       return;
     }
 
+    // Initialize connectivity only in real runtime. Linux CI does not expose
+    // NetworkManager over DBus, so integration tests use the mock branch above.
+    _initConnectivity();
+
     await _isarService.init();
     await _supabaseService.init();
-    
+
     // 1. Load cached data instantly (0ms UI loading)
     await _loadCachedData();
-    
+
     // 2. Fetch fresh data from network in background
     await fetchAllData();
-    
+
     // 3. Setup realtime sync
     _setupRealtime();
 
@@ -109,8 +112,12 @@ class DataProvider extends ChangeNotifier {
   }
 
   void _initConnectivity() {
-    Connectivity().onConnectivityChanged.listen((List<ConnectivityResult> results) {
-      final hasConnection = results.any((result) => result != ConnectivityResult.none);
+    Connectivity().onConnectivityChanged.listen((
+      List<ConnectivityResult> results,
+    ) {
+      final hasConnection = results.any(
+        (result) => result != ConnectivityResult.none,
+      );
       if (hasConnection != _isOnline) {
         _isOnline = hasConnection;
         if (_isOnline) {
@@ -159,12 +166,13 @@ class DataProvider extends ChangeNotifier {
 
       _bugs = freshBugs;
       _projects = freshProjects;
-      
+
       // Update local Isar database cache
       await _isarService.cacheProjects(freshProjects);
       await _isarService.cacheBugs(freshBugs);
     } catch (e) {
-      _error = 'Nepodarilo sa načítať údaje zo siete. Používajú sa lokálne dáta.';
+      _error =
+          'Nepodarilo sa načítať údaje zo siete. Používajú sa lokálne dáta.';
       print('Error fetching data: $e');
     } finally {
       _loading = false;
@@ -210,7 +218,9 @@ class DataProvider extends ChangeNotifier {
       return _bugs;
     }
     if (_selectedProjectId == '__unassigned_project__') {
-      return _bugs.where((bug) => bug.projectId == null || bug.projectId!.isEmpty).toList();
+      return _bugs
+          .where((bug) => bug.projectId == null || bug.projectId!.isEmpty)
+          .toList();
     }
     return _bugs.where((bug) => bug.projectId == _selectedProjectId).toList();
   }
@@ -252,8 +262,9 @@ class DataProvider extends ChangeNotifier {
     final now = DateTime.now();
     // Temporary ID for offline/immediate tracking
     final tempId = 'local_${now.millisecondsSinceEpoch}';
-    final trackingId = 'BUG-${(now.millisecondsSinceEpoch % 10000).toString().padLeft(4, '0')}';
-    
+    final trackingId =
+        'BUG-${(now.millisecondsSinceEpoch % 10000).toString().padLeft(4, '0')}';
+
     final bug = Bug(
       id: tempId,
       trackingId: trackingId,
@@ -355,10 +366,7 @@ class DataProvider extends ChangeNotifier {
     }
 
     // 3. Add to sync queue
-    final payload = jsonEncode({
-      'bugId': bugId,
-      'status': status,
-    });
+    final payload = jsonEncode({'bugId': bugId, 'status': status});
     await _isarService.addToQueue('update_status', bugId, payload);
 
     // 4. Run sync queue
@@ -401,10 +409,7 @@ class DataProvider extends ChangeNotifier {
     }
 
     // 3. Add to sync queue
-    final payload = jsonEncode({
-      'bugId': bugId,
-      'severity': severity,
-    });
+    final payload = jsonEncode({'bugId': bugId, 'severity': severity});
     await _isarService.addToQueue('update_severity', bugId, payload);
 
     // 4. Run sync queue
@@ -417,7 +422,7 @@ class DataProvider extends ChangeNotifier {
     try {
       final queue = await _isarService.getOfflineQueue();
       _offlineQueueCount = queue.length;
-      
+
       if (queue.isEmpty) {
         _isSyncing = false;
         _syncError = null;
@@ -428,7 +433,7 @@ class DataProvider extends ChangeNotifier {
       _isSyncing = true;
       _syncError = null;
       notifyListeners();
-      
+
       print('Processing offline queue. Items to sync: ${queue.length}');
 
       if (const bool.fromEnvironment('INTEGRATION_TEST', defaultValue: false)) {
@@ -439,8 +444,9 @@ class DataProvider extends ChangeNotifier {
 
           if (op == 'create') {
             final tempId = item.bugId ?? '';
-            final mockRemoteId = 'synced_${DateTime.now().millisecondsSinceEpoch}';
-            
+            final mockRemoteId =
+                'synced_${DateTime.now().millisecondsSinceEpoch}';
+
             final newBug = Bug(
               id: mockRemoteId,
               trackingId: payload['tracking_id'] ?? '',
@@ -459,7 +465,10 @@ class DataProvider extends ChangeNotifier {
             );
 
             await isar.writeTxn(() async {
-              final localIsarBug = await isar.isarBugs.filter().idEqualTo(tempId).findFirst();
+              final localIsarBug = await isar.isarBugs
+                  .filter()
+                  .idEqualTo(tempId)
+                  .findFirst();
               if (localIsarBug != null) {
                 await isar.isarBugs.delete(localIsarBug.isarId!);
               }
@@ -475,7 +484,10 @@ class DataProvider extends ChangeNotifier {
           } else if (op == 'update_status' || op == 'update_severity') {
             final bugId = item.bugId ?? '';
             await _isarService.removeFromQueue(item.isarId!);
-            final ib = await isar.isarBugs.filter().idEqualTo(bugId).findFirst();
+            final ib = await isar.isarBugs
+                .filter()
+                .idEqualTo(bugId)
+                .findFirst();
             if (ib != null) {
               ib.synced = true;
               await isar.writeTxn(() async {
@@ -487,7 +499,7 @@ class DataProvider extends ChangeNotifier {
         notifyListeners();
         return;
       }
-      
+
       final localIdToRemoteId = <String, String>{};
 
       for (var item in queue) {
@@ -496,7 +508,7 @@ class DataProvider extends ChangeNotifier {
 
         if (op == 'create') {
           final tempId = item.bugId ?? '';
-          
+
           final bugToCreate = Bug(
             id: '', // Supabase will auto-generate UUID
             trackingId: payload['tracking_id'] ?? '',
@@ -521,7 +533,10 @@ class DataProvider extends ChangeNotifier {
             // Delete temporary local record from Isar
             final isar = _isarService.isar;
             await isar.writeTxn(() async {
-              final localIsarBug = await isar.isarBugs.filter().idEqualTo(tempId).findFirst();
+              final localIsarBug = await isar.isarBugs
+                  .filter()
+                  .idEqualTo(tempId)
+                  .findFirst();
               if (localIsarBug != null) {
                 await isar.isarBugs.delete(localIsarBug.isarId!);
               }
@@ -559,7 +574,10 @@ class DataProvider extends ChangeNotifier {
 
           if (success) {
             await _isarService.removeFromQueue(item.isarId!);
-            final ib = await _isarService.isar.isarBugs.filter().idEqualTo(bugId).findFirst();
+            final ib = await _isarService.isar.isarBugs
+                .filter()
+                .idEqualTo(bugId)
+                .findFirst();
             if (ib != null) {
               ib.synced = true;
               await _isarService.isar.writeTxn(() async {
@@ -588,7 +606,10 @@ class DataProvider extends ChangeNotifier {
 
           if (success) {
             await _isarService.removeFromQueue(item.isarId!);
-            final ib = await _isarService.isar.isarBugs.filter().idEqualTo(bugId).findFirst();
+            final ib = await _isarService.isar.isarBugs
+                .filter()
+                .idEqualTo(bugId)
+                .findFirst();
             if (ib != null) {
               ib.synced = true;
               await _isarService.isar.writeTxn(() async {
@@ -618,7 +639,11 @@ class DataProvider extends ChangeNotifier {
   void dispose() {
     _syncTimer?.cancel();
     try {
-      if (_realtimeChannel != null && !const bool.fromEnvironment('INTEGRATION_TEST', defaultValue: false)) {
+      if (_realtimeChannel != null &&
+          !const bool.fromEnvironment(
+            'INTEGRATION_TEST',
+            defaultValue: false,
+          )) {
         _supabaseService.client.removeChannel(_realtimeChannel!);
       }
     } catch (_) {}
