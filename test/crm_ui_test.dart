@@ -13,7 +13,7 @@ import 'package:centralny_dashboard/features/crm/screens/crm_dashboard_screen.da
 void main() {
   group('CRM UI & Widget Tests', () {
     setUpAll(() async {
-      GoogleFonts.config.allowRuntimeFetching = true;
+      GoogleFonts.config.allowRuntimeFetching = false;
       IsarService.isMock = true;
       const MethodChannel channel = MethodChannel(
         'plugins.flutter.io/path_provider',

@@ -9,23 +9,21 @@ class AppTheme {
       double? fontSize,
       FontWeight? fontWeight,
       FontStyle? fontStyle,
-    }) googleFont, {
+    })
+    googleFont, {
     Color? color,
     double? fontSize,
     FontWeight? fontWeight,
   }) {
-    if (const bool.fromEnvironment('INTEGRATION_TEST', defaultValue: false)) {
+    if (const bool.fromEnvironment('INTEGRATION_TEST', defaultValue: false) ||
+        !GoogleFonts.config.allowRuntimeFetching) {
       return TextStyle(
         color: color,
         fontSize: fontSize,
         fontWeight: fontWeight,
       );
     }
-    return googleFont(
-      color: color,
-      fontSize: fontSize,
-      fontWeight: fontWeight,
-    );
+    return googleFont(color: color, fontSize: fontSize, fontWeight: fontWeight);
   }
 
   // Theme colors
@@ -218,7 +216,10 @@ class AppTheme {
         color: const Color(0xFFFFFFFF),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
-          side: BorderSide(color: const Color(0xFFE0E0E0).withValues(alpha: 0.2), width: 1),
+          side: BorderSide(
+            color: const Color(0xFFE0E0E0).withValues(alpha: 0.2),
+            width: 1,
+          ),
         ),
       ),
       iconTheme: const IconThemeData(color: Color(0xFF1F1F1F)),
@@ -229,5 +230,4 @@ class AppTheme {
       ),
     );
   }
-
 }

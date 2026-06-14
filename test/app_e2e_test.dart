@@ -7,6 +7,11 @@ import 'package:isar/isar.dart';
 import 'package:centralny_dashboard/main.dart' as app;
 import 'package:centralny_dashboard/core/isar_service.dart';
 
+const _integrationTestMode = bool.fromEnvironment(
+  'INTEGRATION_TEST',
+  defaultValue: false,
+);
+
 Future<void> _pumpUntilFound(
   WidgetTester tester,
   Finder finder, {
@@ -57,9 +62,9 @@ Future<void> _tapSidebarItem(WidgetTester tester, String label) async {
 }
 
 void main() {
-  group('Centralny Dashboard E2E Headless Tests', () {
+  group('Centralny Dashboard E2E Headless Tests', skip: !_integrationTestMode, () {
     setUpAll(() async {
-      GoogleFonts.config.allowRuntimeFetching = true;
+      GoogleFonts.config.allowRuntimeFetching = false;
       const MethodChannel channel = MethodChannel(
         'plugins.flutter.io/path_provider',
       );
