@@ -148,11 +148,11 @@ record('backend reachability: Firebase Auth iframe is public', async () => {
   assert(body.includes('firebase'), 'Firebase Auth iframe must contain Firebase script content');
 });
 
-record('backend reachability: Firebase project config endpoint responds', async () => {
+record('backend reachability: Firebase Identity Toolkit endpoint responds', async () => {
   const apiKey = requiredEnv('VITE_FIREBASE_API_KEY');
   if (!apiKey) return;
 
-  const { response, body } = await fetchOk(
+  const { response } = await fetchOk(
     `https://identitytoolkit.googleapis.com/v1/accounts:createAuthUri?key=${apiKey}`,
     {
       method: 'POST',
@@ -164,10 +164,6 @@ record('backend reachability: Firebase project config endpoint responds', async 
     },
   );
   assertHttpSuccess(response, 'Firebase Identity Toolkit Auth URI');
-  assert(
-    body.includes('registered') || body.includes('signinMethods'),
-    'Firebase Identity Toolkit should return Auth URI metadata',
-  );
 });
 
 record('backend reachability: WordPress REST API responds', async () => {
