@@ -38,9 +38,11 @@ async function fetchOk(url, options = {}) {
   const timeout = setTimeout(() => controller.abort(), options.timeoutMs || 20000);
   try {
     const response = await fetch(url, {
+      method: options.method || 'GET',
       redirect: 'follow',
       signal: controller.signal,
       headers: options.headers,
+      body: options.body,
     });
     const body = options.readBody === false ? '' : await response.text();
     return { response, body };
@@ -147,15 +149,25 @@ record('backend reachability: Firebase Auth iframe is public', async () => {
 });
 
 record('backend reachability: Firebase project config endpoint responds', async () => {
-  const projectId = requiredEnv('VITE_FIREBASE_PROJECT_ID');
   const apiKey = requiredEnv('VITE_FIREBASE_API_KEY');
-  if (!projectId || !apiKey) return;
+  if (!apiKey) return;
 
-  const { response } = await fetchOk(
-    `https://identitytoolkit.googleapis.com/v1/projects/${projectId}/config?key=${apiKey}`,
-    { readBody: false },
+  const { response, body } = await fetchOk(
+    `https://identitytoolkit.googleapis.com/v1/accounts:createAuthUri?key=${apiKey}`,
+    {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        identifier: 'ci-reachability-check@example.invalid',
+        continueUri: baseUrl,
+      }),
+    },
   );
-  assertHttpSuccess(response, 'Firebase Identity Toolkit project config');
+  assertHttpSuccess(response, 'Firebase Identity Toolkit Auth URI');
+  assert(
+    body.includes('registered') || body.includes('signinMethods'),
+    'Firebase Identity Toolkit should return Auth URI metadata',
+  );
 });
 
 record('backend reachability: WordPress REST API responds', async () => {
@@ -164,7 +176,15 @@ record('backend reachability: WordPress REST API responds', async () => {
 
   const { response, body } = await fetchOk(`${normalizeBaseUrl(siteUrl)}/wp-json/`);
   assertHttpSuccess(response, 'WordPress REST API');
-  assert(body.includes('wp/v2'), 'WordPress REST index should expose wp/v2');
+  assert(
+    response.headers.get('content-type')?.includes('json'),
+    'WordPress REST API should return JSON',
+  );
+  const restIndex = JSON.parse(body);
+  assert(
+    restIndex.routes || restIndex.namespaces || restIndex.name,
+    'WordPress REST index should expose REST metadata',
+  );
 });
 
 record('iframe reachability/CSP: Arsenal can be embedded', async () => {
