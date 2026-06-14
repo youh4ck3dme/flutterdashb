@@ -16,14 +16,12 @@ class IsarService {
   Future<void> init() async {
     if (isMock) return;
     if (_isar != null) return;
+    // Isar 3.x currently does not support Flutter Web. Keep web runtime on
+    // network/in-memory data paths instead of repeatedly throwing in console.
+    if (kIsWeb) return;
     try {
-      final String path;
-      if (kIsWeb) {
-        path = '';
-      } else {
-        final dir = await getApplicationDocumentsDirectory();
-        path = dir.path;
-      }
+      final dir = await getApplicationDocumentsDirectory();
+      final path = dir.path;
       _isar = await Isar.open([
         IsarProjectSchema,
         IsarBugSchema,

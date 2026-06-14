@@ -222,7 +222,14 @@ record('visual regression smoke: desktop/tablet/mobile screenshots are generated
     for (const viewport of viewports) {
       const page = await browser.newPage({ viewport });
       const pageErrors = [];
+      const badConsoleMessages = [];
       page.on('pageerror', (error) => pageErrors.push(error.message));
+      page.on('console', (message) => {
+        const text = message.text();
+        if (/Error initializing Isar|IsarError|Please use Isar 2\.5\.0/i.test(text)) {
+          badConsoleMessages.push(text);
+        }
+      });
 
       const response = await page.goto(baseUrl, {
         waitUntil: 'domcontentloaded',
@@ -240,6 +247,10 @@ record('visual regression smoke: desktop/tablet/mobile screenshots are generated
       assert(statSync(viewportPath).size > 5000, `${viewport.name} viewport screenshot is too small`);
       assert(statSync(fullPath).size > 5000, `${viewport.name} full screenshot is too small`);
       assert(pageErrors.length === 0, `${viewport.name} page errors: ${pageErrors.join(' | ')}`);
+      assert(
+        badConsoleMessages.length === 0,
+        `${viewport.name} blocked console errors: ${badConsoleMessages.join(' | ')}`,
+      );
 
       await page.close();
     }
